@@ -27,7 +27,7 @@ public class FoodService {
         catch (Exception e) {
             throw new BadRequestException();
         }
-        return loghme.getCustomer().getCurrentOrder().getFoodsInOrder();
+        return loghme.getUser().getCurrentOrder().getFoodsInOrder();
     }
 
     @RequestMapping(value = "/food/{id}", method = RequestMethod.DELETE,
@@ -43,9 +43,9 @@ public class FoodService {
         catch (Exception e) {
             throw new BadRequestException();
         }
-        if (loghme.getCustomer().getCurrentOrder() == null)
+        if (loghme.getUser().getCurrentOrder() == null)
             return null;
-        return loghme.getCustomer().getCurrentOrder().getFoodsInOrder();
+        return loghme.getUser().getCurrentOrder().getFoodsInOrder();
     }
 
     @RequestMapping(value = "/food", method = RequestMethod.GET,

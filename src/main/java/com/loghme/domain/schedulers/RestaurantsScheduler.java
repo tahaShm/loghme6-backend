@@ -39,11 +39,11 @@ public class RestaurantsScheduler implements ServletContextListener {
 
                 convertedRestaurants = nameMapper.convertValue(restaurants, new TypeReference<ArrayList<Restaurant>>() { });
                 loghme.setRestaurants(convertedRestaurants);
-                loghme.getCustomer().setId("1234");
-                loghme.getCustomer().setName("Houman Chamani");
-                loghme.getCustomer().setPhoneNumber("+989300323231");
-                loghme.getCustomer().setEmail("hoomch@gmail.com");
-                loghme.getCustomer().setCredit(100000);
+                loghme.getUser().setId("1234");
+                loghme.getUser().setName("Houman Chamani");
+                loghme.getUser().setPhoneNumber("+989300323231");
+                loghme.getUser().setEmail("hoomch@gmail.com");
+                loghme.getUser().setCredit(100000);
                 return 0;
             }
         }, 0, TimeUnit.SECONDS);

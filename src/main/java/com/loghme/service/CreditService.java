@@ -22,6 +22,6 @@ public class CreditService {
         catch (JSONException e) {
             throw new BadRequestException();
         }
-        return loghme.getCustomer().getCredit();
+        return loghme.getUser().getCredit();
     }
 }

@@ -8,7 +8,7 @@ import com.loghme.domain.utils.exceptions.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class Customer {
+public class User {
     private String id;
     private String name;
     private String phoneNumber;

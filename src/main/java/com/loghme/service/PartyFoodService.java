@@ -27,7 +27,7 @@ public class PartyFoodService {
         catch (Exception e) {
             throw new BadRequestException();
         }
-        return loghme.getCustomer().getCurrentOrder().getFoodsInOrder();
+        return loghme.getUser().getCurrentOrder().getFoodsInOrder();
     }
 
     @RequestMapping(value = "/partyFood/{id}", method = RequestMethod.DELETE,
@@ -43,14 +43,14 @@ public class PartyFoodService {
         catch (Exception e) {
             throw new BadRequestException();
         }
-        return loghme.getCustomer().getCurrentOrder().getFoodsInOrder();
+        return loghme.getUser().getCurrentOrder().getFoodsInOrder();
     }
 
     @RequestMapping(value = "/partyFood", method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ArrayList<PartyFoodDTO> getFoods() {
         try {
-            return loghme.getRestaurantPartyFoods();
+            return loghme.getPartyFoodsDTO();
         }
         catch (Exception e) {
             throw new BadRequestException();

@@ -12,13 +12,13 @@ import java.util.*;
 public class Loghme
 {
     private ArrayList<Restaurant> restaurants;
-    private Customer customer;
+    private User user;
     private static Loghme singleApp = null;
     private int lastOrderId = 0;
 
     private Loghme() {
         restaurants = new ArrayList<>();
-        customer = new Customer();
+        user = new User();
     }
 
     public static Loghme getInstance() {
@@ -34,26 +34,8 @@ public class Loghme
         return restaurants;
     }
 
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public int getIndexOfRestaurant(String jsonData, int nameOrRestaurantName) throws IOException {
-        int index = -1;
-        ObjectMapper nameMapper = new ObjectMapper();
-        Names newName = nameMapper.readValue(jsonData, Names.class);
-        String restaurantName = "";
-        if (nameOrRestaurantName == 1)
-            restaurantName = newName.getRestaurantName();
-        else
-            restaurantName = newName.getName();
-        for (int i = 0; i < restaurants.size(); i++) {
-            if (restaurantName.equals(restaurants.get(i).getName())) {
-                index = i;
-                break;
-            }
-        }
-        return index;
+    public User getUser() {
+        return user;
     }
 
     public HashMap<String, Float> sortByValue(HashMap<String, Float> hm) {
@@ -101,55 +83,6 @@ public class Loghme
         return allRestaurants;
     }
 
-    public void addRestaurant(String jsonData) throws IOException, RestaurantAlreadyExistsExp {
-        ObjectMapper mapper = new ObjectMapper();
-        Restaurant newRestaurant = mapper.readValue(jsonData, Restaurant.class);
-        for (Restaurant restaurant: restaurants) {
-            if (restaurant.getName().equals(newRestaurant.getName()))
-                throw new RestaurantAlreadyExistsExp();
-        }
-        restaurants.add(newRestaurant);
-    }
-
-    public void addFood(String jsonData) throws RestaurantNotFoundExp, IOException, FoodAlreadyExistsExp {
-        ObjectMapper mapper = new ObjectMapper();
-        Food newFood = mapper.readValue(jsonData, Food.class);
-        int index = getIndexOfRestaurant(jsonData, 1);
-        if (index >= 0)
-            restaurants.get(index).addFood(newFood);
-        else
-            throw new RestaurantNotFoundExp();
-    }
-
-    public String getRestaurantsInfo() {
-        String response = "";
-        for (Restaurant restaurant : restaurants) {
-            response += restaurant.getName() + '\n';
-        }
-        return response;
-    }
-
-    public String getRestaurant(String jsonData) throws RestaurantNotFoundExp, IOException {
-        int index = getIndexOfRestaurant(jsonData, 0);
-        if (index >= 0)
-            return restaurants.get(index).sendJsonInfo();
-        else
-            throw new RestaurantNotFoundExp();
-    }
-
-    public String getFood(String jsonData) throws RestaurantNotFoundExp, IOException, FoodNotFoundExp {
-        int index = getIndexOfRestaurant(jsonData, 1);
-
-        ObjectMapper nameMapper = new ObjectMapper();
-        Names newName = nameMapper.readValue(jsonData, Names.class);
-        String foodName = newName.getFoodName();
-
-        if (index >= 0)
-            return restaurants.get(index).sendJsonFoodInfo(foodName);
-        else
-            throw new RestaurantNotFoundExp();
-    }
-
     public ArrayList<Food> getRestaurantFoods(String id) throws NotFound404Exp {
         Restaurant restaurant = getRestaurantById(id);
         return restaurant.getMenu();
@@ -157,24 +90,24 @@ public class Loghme
 
     public void addToCart(Restaurant restaurant, String foodName, int count, boolean isPartyFood) throws FoodFromOtherRestaurantInCartExp, ExtraFoodPartyExp, FoodNotFoundExp {
         boolean allowToAdd = false;
-        if (customer.getCurrentOrder() == null) {
+        if (user.getCurrentOrder() == null) {
             Order newOrder = new Order(lastOrderId, restaurant);
-            customer.setCurrentOrder(newOrder);
+            user.setCurrentOrder(newOrder);
             allowToAdd = true;
             lastOrderId++;
         }
         else {
-            if (restaurant.getId().equals(customer.currentOrder.getRestaurant().getId()))
+            if (restaurant.getId().equals(user.currentOrder.getRestaurant().getId()))
                 allowToAdd = true;
         }
         if (allowToAdd) {
             if (isPartyFood) {
                 PartyFood partyFood = getPartyFoodByName(foodName, restaurant);
-                customer.addPartyFoodToCurrentOrder(partyFood, count);
+                user.addPartyFoodToCurrentOrder(partyFood, count);
             }
             else {
                 Food food = getFoodByName(foodName, restaurant);
-                customer.addFoodToCurrentOrder(food, count);
+                user.addFoodToCurrentOrder(food, count);
             }
         }
         else
@@ -182,54 +115,41 @@ public class Loghme
     }
 
     public void removeFromCart(Restaurant restaurant, String foodName, int count, boolean isPartyFood) throws FoodFromOtherRestaurantInCartExp, NotEnoughFoodToDelete, FoodNotFoundExp {
-        if (!restaurant.getId().equals(customer.getCurrentOrder().getRestaurant().getId()))
+        if (!restaurant.getId().equals(user.getCurrentOrder().getRestaurant().getId()))
             throw new FoodFromOtherRestaurantInCartExp();
         if (isPartyFood) {
             PartyFood partyFood = getPartyFoodByName(foodName, restaurant);
-            customer.removePartyFoodFromCurrentOrder(partyFood, count);
+            user.removePartyFoodFromCurrentOrder(partyFood, count);
         }
         else {
             Food food = getFoodByName(foodName, restaurant);
-            customer.removeFoodFromCurrentOrder(food, count);
+            user.removeFoodFromCurrentOrder(food, count);
         }
-    }
-
-    public String getCartJson() throws IOException {
-        return customer.getCartJson();
     }
 
     public void finalizeOrder() throws NotEnoughCreditExp, ExtraFoodPartyExp {
-        int cartPrice = customer.cartOverallPrice();
-        Restaurant currentRestaurant = customer.getCurrentOrder().getRestaurant();
-        if (cartPrice > customer.getCredit()) {
-            customer.emptyCurrentOrder();
+        int cartPrice = user.cartOverallPrice();
+        Restaurant currentRestaurant = user.getCurrentOrder().getRestaurant();
+        if (cartPrice > user.getCredit()) {
+            user.emptyCurrentOrder();
             throw new NotEnoughCreditExp();
         }
         try {
-            currentRestaurant.reducePartyFoodAmounts(customer.getCurrentOrder());
+            currentRestaurant.reducePartyFoodAmounts(user.getCurrentOrder());
         }
         catch (ExtraFoodPartyExp e) {
-            customer.emptyCurrentOrder();
+            user.emptyCurrentOrder();
             throw new ExtraFoodPartyExp();
         }
-        customer.getCurrentOrder().setStatus("finding delivery");
+        user.getCurrentOrder().setStatus("finding delivery");
 
         Timer timer = new Timer();
-        TimerTask task = new CouriersScheduler(customer.getCurrentOrder());
+        TimerTask task = new CouriersScheduler(user.getCurrentOrder());
         timer.schedule(task, 0, 3000);
 
-        customer.addCredit(-1 * cartPrice);
-        customer.addOrder(customer.getCurrentOrder());
-        customer.emptyCurrentOrder();
-    }
-
-    public String getRecommendedRestaurants() throws IOException {
-        int numOfBests = 3;
-        if (restaurants.size() < numOfBests)
-            numOfBests = restaurants.size();
-        Map<String, Float> bestRestaurants = getBestRestaurants(numOfBests);
-        ObjectMapper mapperObj = new ObjectMapper();
-        return mapperObj.writeValueAsString(bestRestaurants);
+        user.addCredit(-1 * cartPrice);
+        user.addOrder(user.getCurrentOrder());
+        user.emptyCurrentOrder();
     }
 
     public ArrayList<Restaurant> getCloseRestaurants(float distance){
@@ -250,17 +170,12 @@ public class Loghme
     }
 
     public void addCredit(int credit) {
-        customer.addCredit(credit);
+        user.addCredit(credit);
     }
 
     public void addCredit(String json) throws JSONException {
         JSONObject obj = new JSONObject(json);
-        customer.addCredit(obj.getInt("credit"));
-    }
-
-    public boolean isRestaurantInRange(String id, float distance) throws NotFound404Exp {
-        Restaurant restaurant = getRestaurantById(id);
-        return !(restaurant.getLocation().sendDistance() > distance);
+        user.addCredit(obj.getInt("credit"));
     }
 
     public Food getFoodByName(String foodName, Restaurant restaurant) throws FoodNotFoundExp {
@@ -287,13 +202,13 @@ public class Loghme
         }
     }
 
-    private void deletePreviousCustomerPartyFoods() {
-        customer.clearCurrentPartyFoods();
+    private void deletePreviousUserPartyFoods() {
+        user.clearCurrentPartyFoods();
     }
 
     public void addPartyRestaurants(ArrayList<Restaurant> partyRestaurants) {
         deletePreviousPartyFoods();
-        deletePreviousCustomerPartyFoods();
+        deletePreviousUserPartyFoods();
         for (Restaurant restaurant: partyRestaurants) {
             Restaurant currentRestaurant = null;
             try {
@@ -307,25 +222,7 @@ public class Loghme
         }
     }
 
-    public ArrayList<Restaurant> getClosePartyRestaurants(float distance){
-        ArrayList<Restaurant> closeRestaurants = getCloseRestaurants(distance);
-        ArrayList<Restaurant> closePartyRestaurants = new ArrayList<>();
-        for (Restaurant restaurant: closeRestaurants)
-            if (restaurant.getPartyFoods().size() > 0)
-                closePartyRestaurants.add(restaurant);
-        return closePartyRestaurants;
-    }
-
-    public ArrayList<PartyFood> getPartyFoods() {
-        ArrayList<PartyFood> foods = new ArrayList<>();
-        for (Restaurant restaurant: restaurants) {
-            if (restaurant.getPartyFoods() != null)
-                foods.addAll(restaurant.getPartyFoods());
-        }
-        return foods;
-    }
-
-    public ArrayList<PartyFoodDTO> getRestaurantPartyFoods() {
+    public ArrayList<PartyFoodDTO> getPartyFoodsDTO() {
         ArrayList<PartyFoodDTO> foods = new ArrayList<>();
         for (Restaurant restaurant: restaurants) {
             for (PartyFood partyFood: restaurant.getPartyFoods())

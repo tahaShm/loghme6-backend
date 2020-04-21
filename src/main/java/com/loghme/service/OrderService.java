@@ -15,7 +15,7 @@ public class OrderService {
     @RequestMapping(value = "/order", method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ArrayList<OrderDTO> getOrders() {
-        return loghme.getCustomer().getOrdersLists();
+        return loghme.getUser().getOrdersLists();
     }
 
     @RequestMapping(value = "/order", method = RequestMethod.PUT,
