@@ -1,4 +1,4 @@
-package com.loghme.domain.utils;
+package com.loghme.service.DTO;
 
 import java.util.ArrayList;
 

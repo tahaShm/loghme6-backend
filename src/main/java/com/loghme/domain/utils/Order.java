@@ -1,6 +1,7 @@
 package com.loghme.domain.utils;
 
 import com.loghme.domain.utils.exceptions.*;
+import com.loghme.service.DTO.FoodDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,18 +96,5 @@ public class Order {
 
     public void clearPartyFoods() {
         partyFoods.clear();
-    }
-
-    public ArrayList<FoodDTO> getFoodsInOrder() {
-        ArrayList<FoodDTO> toReturn = new ArrayList<>();
-        for (Map.Entry<Food, Integer> entry: foods.entrySet()) {
-            Food currFood = entry.getKey();
-            toReturn.add(new FoodDTO(currFood.getName(), currFood.getPrice(), entry.getValue()));
-        }
-        for (Map.Entry<PartyFood, Integer> entry: partyFoods.entrySet()) {
-            PartyFood currFood = entry.getKey();
-            toReturn.add(new FoodDTO(currFood.getName(), currFood.getNewPrice(), entry.getValue()));
-        }
-        return  toReturn;
     }
 }
