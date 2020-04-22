@@ -9,7 +9,7 @@ create table Users (
 );
 
 create table Restaurants (
-    id integer NOT NULL AUTO_INCREMENT,
+    id char(100),
     name char(100),
     logoUrl char(255),
     x float,
@@ -39,7 +39,7 @@ create table PartyFoods (
 );
 
 create table Menu (
-    restaurantId integer,
+    restaurantId char(100),
     foodId integer,
     primary key (restaurantId, foodId),
     foreign key (restaurantId) references Restaurants(id) on delete cascade,
@@ -47,7 +47,7 @@ create table Menu (
 );
 
 create table PartyMenu (
-    restaurantId integer,
+    restaurantId char(100),
     partyFoodId integer,
     primary key (restaurantId, partyFoodId),
     foreign key (restaurantId) references Restaurants(id) on delete cascade,
@@ -57,7 +57,7 @@ create table PartyMenu (
 create table Orders (
     id integer NOT NULL AUTO_INCREMENT,
     username char(50),
-    restaurantId integer,
+    restaurantId char(100),
     status char(1),
     registerTime DATETIME,
     primary key (id),

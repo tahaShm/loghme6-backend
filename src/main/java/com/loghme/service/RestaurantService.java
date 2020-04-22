@@ -3,6 +3,7 @@ package com.loghme.service;
 import com.loghme.domain.utils.Loghme;
 import com.loghme.domain.utils.Restaurant;
 import com.loghme.domain.utils.exceptions.BadRequestException;
+import com.loghme.repository.LoghmeRepository;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
