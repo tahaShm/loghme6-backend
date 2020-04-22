@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loghme.domain.utils.exceptions.*;
+import com.loghme.service.DTO.OrderDTO;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -126,14 +127,5 @@ public class User {
             if (currentOrder.getFoods().size() == 0)
                 currentOrder = null;
         }
-    }
-
-    public ArrayList<OrderDTO> getOrdersLists() {
-        ArrayList<OrderDTO> toReturn = new ArrayList<>();
-        for (Order order: orders) {
-            OrderDTO orderDTO = new OrderDTO(order.getStatus(), order.getRestaurant().getName(), order.getFoodsInOrder());
-            toReturn.add(orderDTO);
-        }
-        return toReturn;
     }
 }

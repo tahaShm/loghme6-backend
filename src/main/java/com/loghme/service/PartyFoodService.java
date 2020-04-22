@@ -1,9 +1,10 @@
 package com.loghme.service;
 
-import com.loghme.domain.utils.FoodDTO;
+import com.loghme.service.DTO.DTOHandler;
+import com.loghme.service.DTO.FoodDTO;
 import com.loghme.domain.utils.Loghme;
 import com.loghme.domain.utils.Restaurant;
-import com.loghme.domain.utils.PartyFoodDTO;
+import com.loghme.service.DTO.PartyFoodDTO;
 import com.loghme.domain.utils.exceptions.BadRequestException;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,7 @@ public class PartyFoodService {
         catch (Exception e) {
             throw new BadRequestException();
         }
-        return loghme.getUser().getCurrentOrder().getFoodsInOrder();
+        return DTOHandler.getCurrentOrder();
     }
 
     @RequestMapping(value = "/partyFood/{id}", method = RequestMethod.DELETE,
@@ -43,14 +44,14 @@ public class PartyFoodService {
         catch (Exception e) {
             throw new BadRequestException();
         }
-        return loghme.getUser().getCurrentOrder().getFoodsInOrder();
+        return DTOHandler.getCurrentOrder();
     }
 
     @RequestMapping(value = "/partyFood", method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ArrayList<PartyFoodDTO> getFoods() {
         try {
-            return loghme.getPartyFoodsDTO();
+            return DTOHandler.getPartyFoods();
         }
         catch (Exception e) {
             throw new BadRequestException();

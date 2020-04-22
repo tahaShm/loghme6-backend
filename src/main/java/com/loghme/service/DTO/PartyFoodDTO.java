@@ -1,4 +1,6 @@
-package com.loghme.domain.utils;
+package com.loghme.service.DTO;
+
+import com.loghme.domain.utils.PartyFood;
 
 public class PartyFoodDTO {
     private PartyFood food;

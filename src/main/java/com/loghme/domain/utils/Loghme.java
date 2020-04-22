@@ -1,12 +1,11 @@
 package com.loghme.domain.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loghme.domain.schedulers.CouriersScheduler;
 import com.loghme.domain.utils.exceptions.*;
+import com.loghme.service.DTO.PartyFoodDTO;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.*;
 
 public class Loghme
@@ -34,7 +33,7 @@ public class Loghme
         return restaurants;
     }
 
-    public User getUser() {
+    public User getUser()  {
         return user;
     }
 
@@ -81,11 +80,6 @@ public class Loghme
         }
 
         return allRestaurants;
-    }
-
-    public ArrayList<Food> getRestaurantFoods(String id) throws NotFound404Exp {
-        Restaurant restaurant = getRestaurantById(id);
-        return restaurant.getMenu();
     }
 
     public void addToCart(Restaurant restaurant, String foodName, int count, boolean isPartyFood) throws FoodFromOtherRestaurantInCartExp, ExtraFoodPartyExp, FoodNotFoundExp {
@@ -162,11 +156,11 @@ public class Loghme
         return closeRestaurants;
     }
 
-    public Restaurant getRestaurantById(String inId) throws NotFound404Exp {
+    public Restaurant getRestaurantById(String inId) throws RestaurantNotFoundExp {
         for (Restaurant restaurant: restaurants)
             if (restaurant.getId().equals(inId))
                 return restaurant;
-        throw new NotFound404Exp();
+        throw new RestaurantNotFoundExp();
     }
 
     public void addCredit(int credit) {
@@ -214,20 +208,11 @@ public class Loghme
             try {
                 currentRestaurant = getRestaurantById(restaurant.getId());
                 currentRestaurant.addPartyFoods(restaurant.getPartyFoods());
-            } catch (NotFound404Exp notFound404Exp) {
+            } catch (RestaurantNotFoundExp e) {
                 currentRestaurant = restaurant;
                 restaurants.add(restaurant);
             }
             currentRestaurant.updateMenu();
         }
-    }
-
-    public ArrayList<PartyFoodDTO> getPartyFoodsDTO() {
-        ArrayList<PartyFoodDTO> foods = new ArrayList<>();
-        for (Restaurant restaurant: restaurants) {
-            for (PartyFood partyFood: restaurant.getPartyFoods())
-                foods.add(new PartyFoodDTO(partyFood, restaurant.getName(), restaurant.getId()));
-        }
-        return foods;
     }
 }

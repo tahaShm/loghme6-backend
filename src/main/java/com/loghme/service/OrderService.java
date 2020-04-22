@@ -1,7 +1,8 @@
 package com.loghme.service;
 
 import com.loghme.domain.utils.Loghme;
-import com.loghme.domain.utils.OrderDTO;
+import com.loghme.service.DTO.DTOHandler;
+import com.loghme.service.DTO.OrderDTO;
 import com.loghme.domain.utils.exceptions.BadRequestException;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +16,7 @@ public class OrderService {
     @RequestMapping(value = "/order", method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ArrayList<OrderDTO> getOrders() {
-        return loghme.getUser().getOrdersLists();
+        return DTOHandler.getOrders();
     }
 
     @RequestMapping(value = "/order", method = RequestMethod.PUT,

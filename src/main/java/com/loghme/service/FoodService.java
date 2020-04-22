@@ -1,7 +1,8 @@
 package com.loghme.service;
 
 import com.loghme.domain.utils.Food;
-import com.loghme.domain.utils.FoodDTO;
+import com.loghme.service.DTO.DTOHandler;
+import com.loghme.service.DTO.FoodDTO;
 import com.loghme.domain.utils.Loghme;
 import com.loghme.domain.utils.Restaurant;
 import com.loghme.domain.utils.exceptions.BadRequestException;
@@ -27,7 +28,7 @@ public class FoodService {
         catch (Exception e) {
             throw new BadRequestException();
         }
-        return loghme.getUser().getCurrentOrder().getFoodsInOrder();
+        return DTOHandler.getCurrentOrder();
     }
 
     @RequestMapping(value = "/food/{id}", method = RequestMethod.DELETE,
@@ -45,16 +46,16 @@ public class FoodService {
         }
         if (loghme.getUser().getCurrentOrder() == null)
             return null;
-        return loghme.getUser().getCurrentOrder().getFoodsInOrder();
+        return DTOHandler.getCurrentOrder();
     }
 
     @RequestMapping(value = "/food", method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ArrayList<Food> getFoods(
+    public ArrayList<FoodDTO> getFoods(
             @RequestParam(value = "id") String id) {
-        ArrayList<Food> foods = null;
+        ArrayList<FoodDTO> foods = null;
         try {
-            foods = loghme.getRestaurantFoods(id);
+            foods = DTOHandler.getRestaurantFoods(id);
         }
         catch (Exception e) {
             throw new BadRequestException();
