@@ -3,6 +3,7 @@ package com.loghme.service;
 import com.loghme.domain.utils.Loghme;
 import com.loghme.domain.utils.Restaurant;
 import com.loghme.domain.utils.exceptions.BadRequestException;
+import com.loghme.repository.LoghmeRepository;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,7 @@ public class RestaurantService {
     @RequestMapping(value = "/restaurant", method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ArrayList<Restaurant> getRestaurants() {
+        LoghmeRepository.getInstance().loginUser("tahash", "1234");
         return loghme.getRestaurants();
     }
 
