@@ -1,6 +1,7 @@
 package com.loghme.service;
 
 import com.loghme.domain.utils.Loghme;
+import com.loghme.repository.LoghmeRepository;
 import com.loghme.service.DTO.DTOHandler;
 import com.loghme.service.DTO.OrderDTO;
 import com.loghme.domain.utils.exceptions.BadRequestException;
@@ -16,7 +17,7 @@ public class OrderService {
     @RequestMapping(value = "/order", method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ArrayList<OrderDTO> getOrders() {
-        return DTOHandler.getOrders();
+        return loghme.getUserOrders("1234");
     }
 
     @RequestMapping(value = "/order", method = RequestMethod.PUT,

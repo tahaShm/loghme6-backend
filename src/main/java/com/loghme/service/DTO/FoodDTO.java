@@ -8,6 +8,8 @@ public class FoodDTO {
     private float popularity;
     private String image;
 
+    public FoodDTO() {}
+
     public FoodDTO(String name, int price, int count) {
         this.name = name;
         this.price = price;

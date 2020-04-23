@@ -3,7 +3,7 @@ package com.loghme.domain.utils;
 import com.loghme.domain.schedulers.CouriersScheduler;
 import com.loghme.domain.utils.exceptions.*;
 import com.loghme.repository.LoghmeRepository;
-import com.loghme.service.DTO.PartyFoodDTO;
+import com.loghme.service.DTO.OrderDTO;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,6 +16,7 @@ public class Loghme
     private User user;
     private static Loghme singleApp = null;
     private int lastOrderId = 0;
+    private LoghmeRepository loghmeRepository = LoghmeRepository.getInstance();
 
     private Loghme() {
         restaurants = new ArrayList<>();
@@ -124,7 +125,6 @@ public class Loghme
     }
 
     public void finalizeOrder() throws NotEnoughCreditExp, ExtraFoodPartyExp {
-        LoghmeRepository loghmeRepository = LoghmeRepository.getInstance();
         int cartPrice = user.cartOverallPrice();
         Restaurant currentRestaurant = user.getCurrentOrder().getRestaurant();
         if (cartPrice > user.getCredit()) {
@@ -138,17 +138,17 @@ public class Loghme
             user.emptyCurrentOrder();
             throw new ExtraFoodPartyExp();
         }
-        user.getCurrentOrder().setStatus("finding delivery");
-
-        Timer timer = new Timer();
-        TimerTask task = new CouriersScheduler(user.getCurrentOrder());
-        timer.schedule(task, 0, 3000);
+        user.getCurrentOrder().setStatus("searching");
 
         user.addCredit(-1 * cartPrice);
         user.addOrder(user.getCurrentOrder());
 
         Order currentOrder = getUser().getCurrentOrder();
-        loghmeRepository.addOrder(getUser().getId(), currentOrder.getRestaurant().getId(), "searching", currentOrder.getFoods(), currentOrder.getPartyFoods());
+        int orderId = loghmeRepository.addOrder(getUser().getId(), currentOrder.getRestaurant().getId(), "searching", currentOrder.getFoods(), currentOrder.getPartyFoods());
+
+        Timer timer = new Timer();
+        TimerTask task = new CouriersScheduler(user.getCurrentOrder().getRestaurant(), orderId);
+        timer.schedule(task, 0, 3000);
 
         user.emptyCurrentOrder();
     }
@@ -208,13 +208,12 @@ public class Loghme
     }
 
     public void addPartyRestaurants(ArrayList<Restaurant> partyRestaurants) throws SQLException {
-        LoghmeRepository loghmeRepo = LoghmeRepository.getInstance();
-        loghmeRepo.invalidPrevPartyFoods();
+        loghmeRepository.invalidPrevPartyFoods();
         for (Restaurant restaurant: partyRestaurants) {
-            loghmeRepo.addRestaurant(restaurant.getId(), restaurant.getName(), restaurant.getLogo(), restaurant.getLocation().getX(), restaurant.getLocation().getY());
+            loghmeRepository.addRestaurant(restaurant.getId(), restaurant.getName(), restaurant.getLogo(), restaurant.getLocation().getX(), restaurant.getLocation().getY());
             for (PartyFood partyFood: restaurant.getPartyFoods()) {
-                int foodId = loghmeRepo.addFood(restaurant.getId(), partyFood.getName(), partyFood.getDescription(), partyFood.getPopularity(), partyFood.getImage(), partyFood.getPrice(), partyFood.getCount());
-                loghmeRepo.addPartyFood(restaurant.getId(), foodId, partyFood.getNewPrice(), partyFood.getCount());
+                int foodId = loghmeRepository.addFood(restaurant.getId(), partyFood.getName(), partyFood.getDescription(), partyFood.getPopularity(), partyFood.getImage(), partyFood.getPrice(), partyFood.getCount());
+                loghmeRepository.addPartyFood(restaurant.getId(), foodId, partyFood.getNewPrice(), partyFood.getCount());
 
             }
         }
@@ -231,5 +230,9 @@ public class Loghme
             }
             currentRestaurant.updateMenu();
         }
+    }
+
+    public ArrayList<OrderDTO> getUserOrders(String username) {
+        return loghmeRepository.getOrders(username);
     }
 }

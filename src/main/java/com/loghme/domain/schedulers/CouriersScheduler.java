@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loghme.domain.utils.Courier;
 import com.loghme.domain.utils.Location;
 import com.loghme.domain.utils.Order;
+import com.loghme.domain.utils.Restaurant;
+import com.loghme.repository.LoghmeRepository;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -13,9 +15,13 @@ import java.lang.*;
 
 public class CouriersScheduler extends TimerTask {
     private ArrayList<Courier> couriers = null;
-    private Order order;
+    private Restaurant restaurant;
+    private int orderId;
 
-    public CouriersScheduler(Order order) {this.order = order;}
+    public CouriersScheduler(Restaurant restaurant, int orderId) {
+        this.restaurant = restaurant;
+        this.orderId = orderId;
+    }
 
     public void initCouriers() {
         couriers = null;
@@ -34,7 +40,7 @@ public class CouriersScheduler extends TimerTask {
     public Courier getClosestCourier() {
         Courier bestCourier = couriers.get(0);
         double d;
-        Location restaurantLocation = order.getRestaurant().getLocation();
+        Location restaurantLocation = restaurant.getLocation();
         double minTime = Double.MAX_VALUE, time;
 
         for (Courier courier: couriers) {
@@ -50,7 +56,7 @@ public class CouriersScheduler extends TimerTask {
     }
 
     public void run() {
-        Location restaurantLocation = order.getRestaurant().getLocation();
+        Location restaurantLocation = restaurant.getLocation();
         initCouriers();
         Courier closestCourier;
         if (couriers != null && couriers.size() != 0) {
@@ -62,12 +68,14 @@ public class CouriersScheduler extends TimerTask {
                 time += Math.sqrt(Math.pow(restaurantLocation.getX() - closestCourier.getLocation().getX(), 2) + Math.pow(restaurantLocation.getY() - closestCourier.getLocation().getY(), 2));
                 time = time / closestCourier.getVelocity();
 
-                order.setRemainingTime(time);
-                order.setStatus("delivering");
-                order.setDeliveryBeginTime(System.nanoTime());
+//                order.setRemainingTime(time);
+//                order.setStatus("delivering");
+//                order.setDeliveryBeginTime(System.nanoTime());
+
+                LoghmeRepository.getInstance().updateOrderStatus("delivering", orderId);
 
                 Timer timer = new Timer();
-                TimerTask task = new ChangeCourierStatus(order);
+                TimerTask task = new ChangeCourierStatus(orderId);
                 timer.schedule(task, (long) time*1000);
             }
             catch (Exception e) {

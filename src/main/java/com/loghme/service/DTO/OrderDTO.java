@@ -7,6 +7,8 @@ public class OrderDTO {
     private String restaurantName;
     private ArrayList<FoodDTO> foods;
 
+    public OrderDTO() {}
+
     public OrderDTO(String status, String restaurantName, ArrayList<FoodDTO> foods) {
         this.status = status;
         this.restaurantName = restaurantName;
