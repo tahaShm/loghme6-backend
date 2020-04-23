@@ -117,15 +117,16 @@ public class LoghmeRepository {
         }
     }
 
-    public void addFood(String restaurantId, String name, String description, float popularity, String imageUrl, int price, int count) {
+    public int addFood(String restaurantId, String name, String description, float popularity, String imageUrl, int price, int count) {
         Connection connection;
+        int foodId = 0;
         try {
             connection = dataSource.getConnection();
             Statement statement = connection.createStatement();
             ResultSet result = statement.executeQuery("select F.id from Foods F, Menu M where M.restaurantId = \"" + restaurantId + "\" and F.name = \"" + name + "\" and M.foodId = F.id");
             if (result.next()) { //food already exits -> update Foods
-                int foodId = result.getInt("id");
-                System.out.println("food update here!  " + foodId);
+                foodId = result.getInt("id");
+//                System.out.println("food update here!  " + foodId);
                 PreparedStatement pStatement = connection.prepareStatement(
                         "update Foods set description = ?, popularity = ?, imageUrl = ?, price = ?, count = ? where id = ?");
                 pStatement.setString(1, description);
@@ -135,10 +136,9 @@ public class LoghmeRepository {
                 pStatement.setInt(5, count);
                 pStatement.setInt(6, foodId);
                 pStatement.executeUpdate();
+                pStatement.close();
             }
             else { //new food -> insert into Foods and Menu
-//                System.out.println("food insert here!");
-//                System.out.println(restaurantId);
                 PreparedStatement pStatement = connection.prepareStatement(
                         "insert into Foods (name, description, popularity, imageUrl, price, count) values (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
                 pStatement.setString(1, name);
@@ -149,10 +149,11 @@ public class LoghmeRepository {
                 pStatement.setInt(6, count);
                 pStatement.executeUpdate();
                 ResultSet rs = pStatement.getGeneratedKeys();
-                int foodId = 0;
+
                 if(rs.next())
                     foodId = rs.getInt(1);
-                System.out.println(foodId);
+//                System.out.println("food insert here!" + foodId);
+                rs.close();
                 pStatement.close();
 
                 PreparedStatement pStatementMenu = connection.prepareStatement(
@@ -162,6 +163,81 @@ public class LoghmeRepository {
                 pStatementMenu.executeUpdate();
                 pStatementMenu.close();
             }
+            result.close();
+            statement.close();
+            connection.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return foodId;
+    }
+
+    public void invalidPrevPartyFoods() {
+        Connection connection;
+        try {
+            connection = dataSource.getConnection();
+            String invalid = "0";
+            String valid = "1";
+            PreparedStatement pStatement = connection.prepareStatement(
+                    "update PartyFoods set valid = ? where valid = ?");
+            pStatement.setString(1, invalid);
+            pStatement.setString(2, valid);
+            pStatement.executeUpdate();
+            pStatement.close();
+            connection.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addPartyFood(String restaurantId, int foodId, int newPrice, int count){
+        Connection connection;
+        int partyFoodId = 0;
+        String valid = "1";
+        try {
+            connection = dataSource.getConnection();
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery("select PF.id from PartyFoods PF, PartyMenu PM where PM.restaurantId = \"" + restaurantId + "\" and PF.foodId = \"" + foodId + "\" and PM.partyFoodId = PF.id");
+            if (result.next()) { //partyFood already exits -> update PartyFoods
+                partyFoodId = result.getInt("id");
+                System.out.println("partyfood update here!  " + partyFoodId);
+                PreparedStatement pStatement = connection.prepareStatement(
+                        "update PartyFoods set newPrice = ?, count = ?, valid = ? where id = ?");
+
+                pStatement.setInt(1, newPrice);
+                pStatement.setInt(2, count);
+                pStatement.setString(3, valid);
+                pStatement.setInt(4, partyFoodId);
+                pStatement.executeUpdate();
+                pStatement.close();
+            } else { //new food -> insert into PartyFoods and Menu
+
+                PreparedStatement pStatement = connection.prepareStatement(
+                        "insert into PartyFoods (foodId, newPrice, count, valid) values (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                pStatement.setInt(1, foodId);
+                pStatement.setInt(2, newPrice);
+                pStatement.setInt(3, count);
+                pStatement.setString(4, valid);
+                pStatement.executeUpdate();
+                ResultSet rs = pStatement.getGeneratedKeys();
+
+                if (rs.next())
+                    partyFoodId = rs.getInt(1);
+                System.out.println("partyfood insert here!" + partyFoodId);
+                rs.close();
+                pStatement.close();
+
+                PreparedStatement pStatementMenu = connection.prepareStatement(
+                        "insert into PartyMenu (restaurantId, partyFoodId) values (?, ?)");
+                pStatementMenu.setString(1, restaurantId);
+                pStatementMenu.setInt(2, partyFoodId);
+                pStatementMenu.executeUpdate();
+                pStatementMenu.close();
+            }
+            result.close();
+            statement.close();
             connection.close();
         }
         catch (SQLException e) {

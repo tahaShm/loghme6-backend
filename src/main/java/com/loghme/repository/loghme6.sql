@@ -61,7 +61,7 @@ create table Orders (
     status char(1),
     registerTime DATETIME,
     primary key (id),
-    foreign key (username) references Users(username) on delete no action,
+    foreign key (username) references Users(username) on delete cascade,
     foreign key (restaurantId) references Restaurants(id) on delete cascade
 );
 
@@ -73,6 +73,6 @@ create table OrderRows (
     amount integer,
     primary key (orderId, foodId, partyFoodId),
     foreign key (orderId) references Orders(id) on delete cascade,
-    foreign key (foodId) references Foods(id) on delete no action,
-    foreign key (partyFoodId) references PartyFoods(id) on delete no action
+    foreign key (foodId) references Foods(id) on delete cascade,
+    foreign key (partyFoodId) references PartyFoods(id) on delete cascade
 );

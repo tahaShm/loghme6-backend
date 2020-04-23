@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loghme.domain.utils.Loghme;
 import com.loghme.domain.utils.Restaurant;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class PartySchedulerRunnable implements Runnable {
@@ -23,6 +24,10 @@ public class PartySchedulerRunnable implements Runnable {
             e.printStackTrace();
         }
         ArrayList<Restaurant> partyRestaurants = nameMapper.convertValue(tempRestaurants, new TypeReference<ArrayList<Restaurant>>() { });
-        Loghme.getInstance().addPartyRestaurants(partyRestaurants);
+        try {
+            Loghme.getInstance().addPartyRestaurants(partyRestaurants);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

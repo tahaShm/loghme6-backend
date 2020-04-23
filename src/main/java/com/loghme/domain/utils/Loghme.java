@@ -2,10 +2,12 @@ package com.loghme.domain.utils;
 
 import com.loghme.domain.schedulers.CouriersScheduler;
 import com.loghme.domain.utils.exceptions.*;
+import com.loghme.repository.LoghmeRepository;
 import com.loghme.service.DTO.PartyFoodDTO;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.SQLException;
 import java.util.*;
 
 public class Loghme
@@ -200,19 +202,29 @@ public class Loghme
         user.clearCurrentPartyFoods();
     }
 
-    public void addPartyRestaurants(ArrayList<Restaurant> partyRestaurants) {
-        deletePreviousPartyFoods();
-        deletePreviousUserPartyFoods();
+    public void addPartyRestaurants(ArrayList<Restaurant> partyRestaurants) throws SQLException {
+        LoghmeRepository loghmeRepo = LoghmeRepository.getInstance();
+        loghmeRepo.invalidPrevPartyFoods();
         for (Restaurant restaurant: partyRestaurants) {
-            Restaurant currentRestaurant = null;
-            try {
-                currentRestaurant = getRestaurantById(restaurant.getId());
-                currentRestaurant.addPartyFoods(restaurant.getPartyFoods());
-            } catch (RestaurantNotFoundExp e) {
-                currentRestaurant = restaurant;
-                restaurants.add(restaurant);
+            loghmeRepo.addRestaurant(restaurant.getId(), restaurant.getName(), restaurant.getLogo(), restaurant.getLocation().getX(), restaurant.getLocation().getY());
+            for (PartyFood partyFood: restaurant.getPartyFoods()) {
+                int foodId = loghmeRepo.addFood(restaurant.getId(), partyFood.getName(), partyFood.getDescription(), partyFood.getPopularity(), partyFood.getImage(), partyFood.getPrice(), partyFood.getCount());
+                loghmeRepo.addPartyFood(restaurant.getId(), foodId, partyFood.getNewPrice(), partyFood.getCount());
+
             }
-            currentRestaurant.updateMenu();
         }
+//        deletePreviousPartyFoods();
+//        deletePreviousUserPartyFoods();
+//        for (Restaurant restaurant: partyRestaurants) {
+//            Restaurant currentRestaurant = null;
+//            try {
+//                currentRestaurant = getRestaurantById(restaurant.getId());
+//                currentRestaurant.addPartyFoods(restaurant.getPartyFoods());
+//            } catch (RestaurantNotFoundExp e) {
+//                currentRestaurant = restaurant;
+//                restaurants.add(restaurant);
+//            }
+//            currentRestaurant.updateMenu();
+//        }
     }
 }
