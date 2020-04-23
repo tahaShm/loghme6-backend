@@ -218,18 +218,18 @@ public class Loghme
 
             }
         }
-//        deletePreviousPartyFoods();
-//        deletePreviousUserPartyFoods();
-//        for (Restaurant restaurant: partyRestaurants) {
-//            Restaurant currentRestaurant = null;
-//            try {
-//                currentRestaurant = getRestaurantById(restaurant.getId());
-//                currentRestaurant.addPartyFoods(restaurant.getPartyFoods());
-//            } catch (RestaurantNotFoundExp e) {
-//                currentRestaurant = restaurant;
-//                restaurants.add(restaurant);
-//            }
-//            currentRestaurant.updateMenu();
-//        }
+        deletePreviousPartyFoods();
+        deletePreviousUserPartyFoods();
+        for (Restaurant restaurant: partyRestaurants) {
+            Restaurant currentRestaurant = null;
+            try {
+                currentRestaurant = getRestaurantById(restaurant.getId());
+                currentRestaurant.addPartyFoods(restaurant.getPartyFoods());
+            } catch (RestaurantNotFoundExp e) {
+                currentRestaurant = restaurant;
+                restaurants.add(restaurant);
+            }
+            currentRestaurant.updateMenu();
+        }
     }
 }
