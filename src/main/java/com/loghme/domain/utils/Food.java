@@ -15,6 +15,7 @@ public class Food {
     private float popularity;
     private String image;
     private int price;
+    private int count;
 
     public String toString() { return name; }
 
@@ -57,6 +58,10 @@ public class Food {
     public void setPrice(int price) {
         this.price = price;
     }
+
+    public void setCount(int count) {this.count = count;}
+
+    public int getCount() {return count;}
 
     public String sendInfo() throws JsonParseException, JsonMappingException, IOException {
         ObjectMapper mapper = new ObjectMapper();

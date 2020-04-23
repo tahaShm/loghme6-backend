@@ -24,7 +24,7 @@ public class LoghmeRepository {
         dataSource = new ComboPooledDataSource();
         dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/loghme6?useSSL=false");
         dataSource.setUser("root");
-        dataSource.setPassword("Sph153153");
+        dataSource.setPassword("Taha1378");
 
         dataSource.setInitialPoolSize(5);
         dataSource.setMinPoolSize(5);
@@ -97,7 +97,8 @@ public class LoghmeRepository {
             pStatement.executeUpdate();
             pStatement.close();
             connection.close();
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             if(e.getErrorCode() == MYSQL_DUPLICATE_PK ) {
                 connection = dataSource.getConnection();
                 PreparedStatement pStatement = connection.prepareStatement(
@@ -113,6 +114,53 @@ public class LoghmeRepository {
                 pStatement.close();
                 connection.close();
             }
+        }
+    }
+
+    public void addFood(String restaurantId, String name, String description, float popularity, String imageUrl, int price, int count) {
+        Connection connection;
+        try {
+            connection = dataSource.getConnection();
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery("select F.id from Foods F, Menu M where M.restaurantId = \"" + restaurantId + "\" and F.name = \"" + name + "\"");
+            if (result.next()) { //food already exits -> update Foods
+                System.out.println("food update here!");
+                int foodId = result.getInt("id");
+                PreparedStatement pStatement = connection.prepareStatement(
+                        "update Foods set description = ?, popularity = ?, imageUrl = ?, price = ?, count = ? where id = ?");
+                pStatement.setString(1, description);
+                pStatement.setFloat(2, popularity);
+                pStatement.setString(3, imageUrl);
+                pStatement.setInt(4, price);
+                pStatement.setInt(5, count);
+                pStatement.setInt(6, foodId);
+                pStatement.executeUpdate();
+            }
+            else { //new food -> insert into Foods and Menu
+                System.out.println("food insert here!");
+                System.out.println(restaurantId);
+                PreparedStatement pStatement = connection.prepareStatement(
+                        "insert into Foods (name, description, popularity, imageUrl, price, count) values (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                pStatement.setString(1, name);
+                pStatement.setString(2, description);
+                pStatement.setFloat(3, popularity);
+                pStatement.setString(4, imageUrl);
+                pStatement.setInt(5, price);
+                pStatement.setInt(6, count);
+                int foodId = pStatement.executeUpdate();
+                pStatement.close();
+
+//                PreparedStatement pStatementMenu = connection.prepareStatement(
+//                        "insert into Menu (restaurantId, foodId) values (?, ?)");
+//                pStatementMenu.setString(1, restaurantId);
+//                pStatementMenu.setInt(2, foodId);
+//                pStatementMenu.executeUpdate();
+//                pStatementMenu.close();
+                connection.close();
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

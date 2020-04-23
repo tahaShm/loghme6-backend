@@ -2,6 +2,7 @@ package com.loghme.domain.schedulers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.loghme.domain.utils.Food;
 import com.loghme.domain.utils.Loghme;
 import com.loghme.domain.utils.Restaurant;
 import com.loghme.repository.LoghmeRepository;
@@ -41,8 +42,15 @@ public class RestaurantsScheduler implements ServletContextListener {
 
                 convertedRestaurants = nameMapper.convertValue(restaurants, new TypeReference<ArrayList<Restaurant>>() { });
                 loghme.setRestaurants(convertedRestaurants);
-                for (Restaurant restaurant: convertedRestaurants)
-                    loghmeRepository.addRestaurant(restaurant.getId(), restaurant.getName(), restaurant.getLogo(), restaurant.getLocation().getX(), restaurant.getLocation().getY());
+                System.out.println("here we are!");
+                for (Restaurant restaurant: convertedRestaurants) {
+                    LoghmeRepository loghmeRepo = LoghmeRepository.getInstance();
+                    loghmeRepo.addRestaurant(restaurant.getId(), restaurant.getName(), restaurant.getLogo(), restaurant.getLocation().getX(), restaurant.getLocation().getY());
+                    for (Food food: restaurant.getMenu()) {
+                        loghmeRepo.addFood(restaurant.getId(), food.getName(), food.getDescription(), food.getPopularity(), food.getImage(), food.getPrice(), food.getCount());
+                    }
+                }
+
                 loghme.getUser().setId("1234");
                 loghme.getUser().setName("Houman Chamani");
                 loghme.getUser().setPhoneNumber("+989300323231");
