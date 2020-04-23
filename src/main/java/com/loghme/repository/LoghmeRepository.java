@@ -9,6 +9,7 @@ import java.util.List;
 
 public class LoghmeRepository {
     private static LoghmeRepository instance;
+    public static final int MYSQL_DUPLICATE_PK = 1062;
 
     ComboPooledDataSource dataSource;
 
@@ -23,7 +24,7 @@ public class LoghmeRepository {
         dataSource = new ComboPooledDataSource();
         dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/loghme6?useSSL=false");
         dataSource.setUser("root");
-        dataSource.setPassword("Taha1378");
+        dataSource.setPassword("Sph153153");
 
         dataSource.setInitialPoolSize(5);
         dataSource.setMinPoolSize(5);
@@ -62,7 +63,6 @@ public class LoghmeRepository {
         try {
             Connection connection = dataSource.getConnection();
             Statement statement = connection.createStatement();
-            Statement innerStatement = connection.createStatement();
             ResultSet result = statement.executeQuery("select * from Restaurants");
             while (result.next()) {
                 RestaurantDAO restaurantDao = new RestaurantDAO();
@@ -75,19 +75,45 @@ public class LoghmeRepository {
             }
             result.close();
             statement.close();
-            innerStatement.close();
             connection.close();
         }
         catch (SQLException e) {
             e.printStackTrace();
         }
-//        System.out.println(restaurants.get(0).getId());
-//        System.out.println(restaurants.get(0).getName());
-//        System.out.println(restaurants.get(0).getLogoUrl());
-//        System.out.println(restaurants.get(0).getX());
-//        System.out.println(restaurants.get(0).getY());
         return restaurants;
     }
 
+    public void addRestaurant(String id, String name, String logo, float x, float y) throws SQLException {
+        Connection connection;
+        try {
+            connection = dataSource.getConnection();
+            PreparedStatement pStatement = connection.prepareStatement(
+                    "insert into Restaurants (id, name, logoUrl, x, y) values (?, ?, ?, ?, ?)");
+            pStatement.setString(1, id);
+            pStatement.setString(2, name);
+            pStatement.setString(3, logo);
+            pStatement.setFloat(4, x);
+            pStatement.setFloat(5, y);
+            pStatement.executeUpdate();
+            pStatement.close();
+            connection.close();
+        } catch (SQLException e) {
+            if(e.getErrorCode() == MYSQL_DUPLICATE_PK ) {
+                connection = dataSource.getConnection();
+                PreparedStatement pStatement = connection.prepareStatement(
+                        "UPDATE Restaurants " +
+                                "SET name=?, logoUrl=?, x=?, y=? " +
+                                "WHERE id = ?;");
+                pStatement.setString(1, name);
+                pStatement.setString(2, logo);
+                pStatement.setFloat(3, x);
+                pStatement.setFloat(4, y);
+                pStatement.setString(5, id);
+                pStatement.executeUpdate();
+                pStatement.close();
+                connection.close();
+            }
+        }
+    }
 
 }

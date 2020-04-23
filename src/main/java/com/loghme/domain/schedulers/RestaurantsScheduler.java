@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loghme.domain.utils.Loghme;
 import com.loghme.domain.utils.Restaurant;
+import com.loghme.repository.LoghmeRepository;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -27,6 +28,7 @@ public class RestaurantsScheduler implements ServletContextListener {
                 String loghmeBody = "";
                 ArrayList<Restaurant> restaurants = null;
                 Loghme loghme = Loghme.getInstance();
+                LoghmeRepository loghmeRepository = LoghmeRepository.getInstance();
                 ArrayList<Restaurant> convertedRestaurants;
                 ObjectMapper nameMapper = new ObjectMapper();
                 try {
@@ -39,6 +41,8 @@ public class RestaurantsScheduler implements ServletContextListener {
 
                 convertedRestaurants = nameMapper.convertValue(restaurants, new TypeReference<ArrayList<Restaurant>>() { });
                 loghme.setRestaurants(convertedRestaurants);
+                for (Restaurant restaurant: convertedRestaurants)
+                    loghmeRepository.addRestaurant(restaurant.getId(), restaurant.getName(), restaurant.getLogo(), restaurant.getLocation().getX(), restaurant.getLocation().getY());
                 loghme.getUser().setId("1234");
                 loghme.getUser().setName("Houman Chamani");
                 loghme.getUser().setPhoneNumber("+989300323231");
