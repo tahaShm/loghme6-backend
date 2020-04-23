@@ -2,6 +2,8 @@ package com.loghme.repository;
 
 import com.loghme.domain.utils.Food;
 import com.loghme.domain.utils.PartyFood;
+import com.loghme.repository.DAO.FoodDAO;
+import com.loghme.repository.DAO.PartyFoodDAO;
 import com.loghme.repository.DAO.RestaurantDAO;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -246,6 +248,90 @@ public class LoghmeRepository {
             e.printStackTrace();
         }
     }
+
+    public RestaurantDAO getRestaurantById(String restaurantId) {
+        RestaurantDAO restaurantDao = null;
+        try {
+            Connection connection = dataSource.getConnection();
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery("select * from Restaurants where id = \"" + restaurantId  +"\"");
+            if (result.next()) {
+                restaurantDao.setId(result.getString("id"));
+                restaurantDao.setName(result.getString("name"));
+                restaurantDao.setLogoUrl(result.getString("logoUrl"));
+                restaurantDao.setX(result.getFloat("x"));
+                restaurantDao.setY(result.getFloat("y"));
+            }
+            result.close();
+            statement.close();
+            connection.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return restaurantDao;
+    }
+
+    public List<FoodDAO> getRestaurantFoods(String restaurantId) {
+        ArrayList<FoodDAO> foods = new ArrayList<FoodDAO>();
+        try {
+            Connection connection = dataSource.getConnection();
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery("select F.* from Foods f, Menu M where M.restaurantId = \"" + restaurantId  +"\" and M.foodId = F.id");
+            while (result.next()) {
+                FoodDAO foodDAO = new FoodDAO();
+                foodDAO.setId(result.getInt("id"));
+                foodDAO.setName(result.getString("name"));
+                foodDAO.setDescription(result.getString("description"));
+                foodDAO.setPopularity(result.getFloat("popularity"));
+                foodDAO.setImageUrl(result.getString("imageUrl"));
+                foodDAO.setPrice(result.getInt("price"));
+                foodDAO.setCount(result.getInt("count"));
+                foods.add(foodDAO);
+            }
+            result.close();
+            statement.close();
+            connection.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return foods;
+    }
+
+    public List<PartyFoodDAO> getValidPartyFoods () {
+        ArrayList<PartyFoodDAO> partyFoods = new ArrayList<PartyFoodDAO>();
+        try {
+            Connection connection = dataSource.getConnection();
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery("select PF.id as pid, PF.newPrice, PF.count as pCount, PF.valid, F.* from PartyFoods PF,Foods f, PartyMenu PM where PF.valid = \"1\" and PF.foodId = F.id and PM.partyFoodId = PF.id");
+            while (result.next()) {
+                PartyFoodDAO partyFoodDAO = new PartyFoodDAO();
+                partyFoodDAO.setId(result.getInt("pid"));
+                partyFoodDAO.setName(result.getString("name"));
+                partyFoodDAO.setDescription(result.getString("description"));
+                partyFoodDAO.setPopularity(result.getFloat("popularity"));
+                partyFoodDAO.setImageUrl(result.getString("imageUrl"));
+                partyFoodDAO.setPrice(result.getInt("price"));
+                partyFoodDAO.setCount(result.getInt("pCount"));
+                partyFoodDAO.setNewPrice(result.getInt("newPrice"));
+                partyFoodDAO.setValid(result.getString("valid"));
+                partyFoods.add(partyFoodDAO);
+            }
+            result.close();
+            statement.close();
+            connection.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return partyFoods;
+    }
+
+    public void increaseCredit(String username, int newCredit) {
+
+    }
+
     public int getFoodId(Food food, String restaurantId) {
         Connection connection;
         int foodId = -1;
