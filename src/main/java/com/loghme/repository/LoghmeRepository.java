@@ -122,10 +122,10 @@ public class LoghmeRepository {
         try {
             connection = dataSource.getConnection();
             Statement statement = connection.createStatement();
-            ResultSet result = statement.executeQuery("select F.id from Foods F, Menu M where M.restaurantId = \"" + restaurantId + "\" and F.name = \"" + name + "\"");
+            ResultSet result = statement.executeQuery("select F.id from Foods F, Menu M where M.restaurantId = \"" + restaurantId + "\" and F.name = \"" + name + "\" and M.foodId = F.id");
             if (result.next()) { //food already exits -> update Foods
-                System.out.println("food update here!");
                 int foodId = result.getInt("id");
+                System.out.println("food update here!  " + foodId);
                 PreparedStatement pStatement = connection.prepareStatement(
                         "update Foods set description = ?, popularity = ?, imageUrl = ?, price = ?, count = ? where id = ?");
                 pStatement.setString(1, description);
@@ -137,8 +137,8 @@ public class LoghmeRepository {
                 pStatement.executeUpdate();
             }
             else { //new food -> insert into Foods and Menu
-                System.out.println("food insert here!");
-                System.out.println(restaurantId);
+//                System.out.println("food insert here!");
+//                System.out.println(restaurantId);
                 PreparedStatement pStatement = connection.prepareStatement(
                         "insert into Foods (name, description, popularity, imageUrl, price, count) values (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
                 pStatement.setString(1, name);
@@ -147,17 +147,22 @@ public class LoghmeRepository {
                 pStatement.setString(4, imageUrl);
                 pStatement.setInt(5, price);
                 pStatement.setInt(6, count);
-                int foodId = pStatement.executeUpdate();
+                pStatement.executeUpdate();
+                ResultSet rs = pStatement.getGeneratedKeys();
+                int foodId = 0;
+                if(rs.next())
+                    foodId = rs.getInt(1);
+                System.out.println(foodId);
                 pStatement.close();
 
-//                PreparedStatement pStatementMenu = connection.prepareStatement(
-//                        "insert into Menu (restaurantId, foodId) values (?, ?)");
-//                pStatementMenu.setString(1, restaurantId);
-//                pStatementMenu.setInt(2, foodId);
-//                pStatementMenu.executeUpdate();
-//                pStatementMenu.close();
-                connection.close();
+                PreparedStatement pStatementMenu = connection.prepareStatement(
+                        "insert into Menu (restaurantId, foodId) values (?, ?)");
+                pStatementMenu.setString(1, restaurantId);
+                pStatementMenu.setInt(2, foodId);
+                pStatementMenu.executeUpdate();
+                pStatementMenu.close();
             }
+            connection.close();
         }
         catch (SQLException e) {
             e.printStackTrace();
