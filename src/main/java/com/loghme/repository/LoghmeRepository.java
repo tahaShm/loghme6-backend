@@ -1,11 +1,13 @@
 package com.loghme.repository;
 
+import com.loghme.domain.utils.Food;
+import com.loghme.domain.utils.PartyFood;
 import com.loghme.repository.DAO.RestaurantDAO;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.Date;
 
 public class LoghmeRepository {
     private static LoghmeRepository instance;
@@ -47,7 +49,6 @@ public class LoghmeRepository {
             if (result.next()) {
                 String phoneNumber = result.getString("phoneNumber");
                 //same way for other attributes
-                System.out.println(phoneNumber);
                 statement.close();
                 connection.close();
             }
@@ -115,6 +116,7 @@ public class LoghmeRepository {
                 connection.close();
             }
         }
+        System.out.println("new restaurant added...");
     }
 
     public int addFood(String restaurantId, String name, String description, float popularity, String imageUrl, int price, int count) {
@@ -155,6 +157,7 @@ public class LoghmeRepository {
 //                System.out.println("food insert here!" + foodId);
                 rs.close();
                 pStatement.close();
+                System.out.println(foodId);
 
                 PreparedStatement pStatementMenu = connection.prepareStatement(
                         "insert into Menu (restaurantId, foodId) values (?, ?)");
@@ -192,7 +195,7 @@ public class LoghmeRepository {
         }
     }
 
-    public void addPartyFood(String restaurantId, int foodId, int newPrice, int count){
+    public void addPartyFood(String restaurantId, int foodId, int newPrice, int count) {
         Connection connection;
         int partyFoodId = 0;
         String valid = "1";
@@ -239,10 +242,93 @@ public class LoghmeRepository {
             result.close();
             statement.close();
             connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public int getFoodId(Food food, String restaurantId) {
+        Connection connection;
+        int foodId = -1;
+        try {
+            connection = dataSource.getConnection();
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery("SELECT F.id FROM Menu M, Foods F WHERE M.restaurantId=\"" + restaurantId + "\" and F.name=\"" + food.getName() + "\" and F.id=M.foodId ");
+            if (result.next())
+                foodId = result.getInt("id");
+            result.close();
+            statement.close();
+            connection.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return foodId;
+    }
+
+    public int getPartyFoodId(PartyFood food, String restaurantId) {
+        Connection connection;
+        int foodId = -1;
+        try {
+            connection = dataSource.getConnection();
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery("SELECT F.id FROM Menu M, PartyFoods F WHERE M.restaurantId=\"" + restaurantId + "\" and F.name=\"" + food.getName() + "\" and F.id=M.foodId ");
+            if (result.next())
+                foodId = result.getInt("id");
+            result.close();
+            statement.close();
+            connection.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return foodId;
+    }
+
+    public void addOrder(String username, String restaurantId, String status, HashMap<Food, Integer> foods, HashMap<PartyFood, Integer> partyFoods) {
+        Connection connection;
+        try {
+            connection = dataSource.getConnection();
+            PreparedStatement pStatement = connection.prepareStatement(
+                    "insert into Orders (username, restaurantId, status, registerTime) values (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            Date date = new Date();
+            Object param = new java.sql.Timestamp(date.getTime());
+            pStatement.setString(1, username);
+            pStatement.setString(2, restaurantId);
+            pStatement.setString(3, status);
+            pStatement.setObject(4, param);
+            pStatement.executeUpdate();
+
+            ResultSet rs = pStatement.getGeneratedKeys();
+            int orderId = 0;
+            if(rs.next())
+                orderId = rs.getInt(1);
+            rs.close();
+            pStatement.close();
+
+            PreparedStatement orderRowStatement = connection.prepareStatement(
+                    "insert into OrderRows (orderId, foodId, partyFoodId, count) values (?, ?, ?, ?)");
+            for (Map.Entry<Food, Integer> entry: foods.entrySet()) {
+                int foodId = getFoodId(entry.getKey(), restaurantId);
+                if (foodId == -1)
+                    throw new SQLException();
+                orderRowStatement.setInt(1, orderId);
+                orderRowStatement.setInt(2, foodId);
+                orderRowStatement.setInt(4, entry.getValue());
+            }
+            for (Map.Entry<PartyFood, Integer> entry: partyFoods.entrySet()) {
+                int foodId = getPartyFoodId(entry.getKey(), restaurantId);
+                if (foodId == -1)
+                    throw new SQLException();
+                orderRowStatement.setInt(1, orderId);
+                orderRowStatement.setInt(3, foodId);
+                orderRowStatement.setInt(4, entry.getValue());
+            }
+            orderRowStatement.close();
+
+            connection.close();
         }
         catch (SQLException e) {
             e.printStackTrace();
         }
     }
-
 }

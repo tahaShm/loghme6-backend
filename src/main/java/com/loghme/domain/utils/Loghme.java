@@ -124,6 +124,7 @@ public class Loghme
     }
 
     public void finalizeOrder() throws NotEnoughCreditExp, ExtraFoodPartyExp {
+        LoghmeRepository loghmeRepository = LoghmeRepository.getInstance();
         int cartPrice = user.cartOverallPrice();
         Restaurant currentRestaurant = user.getCurrentOrder().getRestaurant();
         if (cartPrice > user.getCredit()) {
@@ -145,6 +146,10 @@ public class Loghme
 
         user.addCredit(-1 * cartPrice);
         user.addOrder(user.getCurrentOrder());
+
+        Order currentOrder = getUser().getCurrentOrder();
+        loghmeRepository.addOrder(getUser().getName(), currentOrder.getRestaurant().getId(), "0", currentOrder.getFoods(), currentOrder.getPartyFoods());
+
         user.emptyCurrentOrder();
     }
 

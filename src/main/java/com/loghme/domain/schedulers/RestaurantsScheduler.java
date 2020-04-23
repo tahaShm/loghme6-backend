@@ -53,7 +53,7 @@ public class RestaurantsScheduler implements ServletContextListener {
 
                 loghme.getUser().setId("1234");
                 loghme.getUser().setName("Houman Chamani");
-                loghme.getUser().setPhoneNumber("+989300323231");
+                loghme.getUser().setPhoneNumber("09300323231");
                 loghme.getUser().setEmail("hoomch@gmail.com");
                 loghme.getUser().setCredit(100000);
                 return 0;
