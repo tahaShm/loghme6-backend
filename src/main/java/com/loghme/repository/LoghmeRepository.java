@@ -26,7 +26,7 @@ public class LoghmeRepository {
         dataSource = new ComboPooledDataSource();
         dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/loghme6?useSSL=false");
         dataSource.setUser("root");
-        dataSource.setPassword("Taha1378");
+        dataSource.setPassword("Sph153153");
 
         dataSource.setInitialPoolSize(5);
         dataSource.setMinPoolSize(5);
@@ -306,25 +306,55 @@ public class LoghmeRepository {
             pStatement.close();
 
             PreparedStatement orderRowStatement = connection.prepareStatement(
-                    "insert into OrderRows (orderId, foodId, partyFoodId, count) values (?, ?, ?, ?)");
+                    "insert into OrderRows (orderId, foodId, partyFoodId, count, foodType) values (?, ?, ?, ?, ?)");
             for (Map.Entry<Food, Integer> entry: foods.entrySet()) {
+                orderRowStatement.clearParameters();
                 int foodId = getFoodId(entry.getKey(), restaurantId);
                 if (foodId == -1)
                     throw new SQLException();
                 orderRowStatement.setInt(1, orderId);
                 orderRowStatement.setInt(2, foodId);
+                orderRowStatement.setString(3, null);
                 orderRowStatement.setInt(4, entry.getValue());
+                orderRowStatement.setString(5, "normal");
+                orderRowStatement.addBatch();
             }
             for (Map.Entry<PartyFood, Integer> entry: partyFoods.entrySet()) {
+                orderRowStatement.clearParameters();
                 int foodId = getPartyFoodId(entry.getKey(), restaurantId);
                 if (foodId == -1)
                     throw new SQLException();
                 orderRowStatement.setInt(1, orderId);
+                orderRowStatement.setString(2, null);
                 orderRowStatement.setInt(3, foodId);
                 orderRowStatement.setInt(4, entry.getValue());
+                orderRowStatement.setString(5, "party");
+                orderRowStatement.addBatch();
             }
+            orderRowStatement.executeBatch();
             orderRowStatement.close();
 
+            connection.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addUser(String id, String name, String phoneNumber, String email, int credit, String password) {
+        Connection connection;
+        try {
+            connection = dataSource.getConnection();
+            PreparedStatement pStatement = connection.prepareStatement(
+                    "insert into Users (name, email, credit, phoneNumber, username, password) values (?, ?, ?, ?, ?, ?)");
+            pStatement.setString(1, name);
+            pStatement.setString(2, email);
+            pStatement.setInt(3, credit);
+            pStatement.setString(4, phoneNumber);
+            pStatement.setString(5, id);
+            pStatement.setString(6, password);
+            pStatement.executeUpdate();
+            pStatement.close();
             connection.close();
         }
         catch (SQLException e) {
