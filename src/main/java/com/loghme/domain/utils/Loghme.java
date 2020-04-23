@@ -148,7 +148,7 @@ public class Loghme
         user.addOrder(user.getCurrentOrder());
 
         Order currentOrder = getUser().getCurrentOrder();
-        loghmeRepository.addOrder(getUser().getName(), currentOrder.getRestaurant().getId(), "0", currentOrder.getFoods(), currentOrder.getPartyFoods());
+        loghmeRepository.addOrder(getUser().getId(), currentOrder.getRestaurant().getId(), "searching", currentOrder.getFoods(), currentOrder.getPartyFoods());
 
         user.emptyCurrentOrder();
     }

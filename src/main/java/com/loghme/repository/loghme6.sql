@@ -58,7 +58,7 @@ create table Orders (
     id integer NOT NULL AUTO_INCREMENT,
     username char(50),
     restaurantId char(100),
-    status char(1),
+    status ENUM ('searching', 'delivering', 'done'),
     registerTime DATETIME,
     primary key (id),
     foreign key (username) references Users(username) on delete cascade,
@@ -66,11 +66,13 @@ create table Orders (
 );
 
 create table OrderRows (
+    id integer NOT NULL AUTO_INCREMENT,
     orderId integer,
-    foodId integer,
-    partyFoodId integer,
+    foodId integer NULL,
+    partyFoodId integer NULL,
     count integer,
-    primary key (orderId, foodId, partyFoodId),
+    foodType ENUM ('normal', 'party'),
+    primary key (id),
     foreign key (orderId) references Orders(id) on delete cascade,
     foreign key (foodId) references Foods(id) on delete cascade,
     foreign key (partyFoodId) references PartyFoods(id) on delete cascade
