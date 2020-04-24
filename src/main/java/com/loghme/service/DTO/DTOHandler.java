@@ -14,12 +14,6 @@ public class DTOHandler {
     private static Loghme loghme = Loghme.getInstance();
 
     public static ArrayList<PartyFoodDTO> getPartyFoods() {
-//        ArrayList<PartyFoodDTO> foods = new ArrayList<>();
-//        for (Restaurant restaurant: loghme.getRestaurants()) {
-//            for (PartyFood partyFood: restaurant.getPartyFoods())
-//                foods.add(new PartyFoodDTO(partyFood, restaurant.getName(), restaurant.getId()));
-//        }
-//        return foods;
         ArrayList<PartyFoodDTO> retPartyFoods = new ArrayList<>();
         LoghmeRepository loghmeRepo = LoghmeRepository.getInstance();
         ArrayList<PartyFoodDAO> partyFoods = loghmeRepo.getValidPartyFoods();
@@ -75,6 +69,17 @@ public class DTOHandler {
         ArrayList<RestaurantDTO> toReturn = new ArrayList<>();
         LoghmeRepository loghmeRepo = LoghmeRepository.getInstance();
         ArrayList<RestaurantDAO> restaurants = loghmeRepo.getRestaurants();
+        for (RestaurantDAO restaurant: restaurants) {
+//            System.out.println(restaurant.getId());
+            toReturn.add(new RestaurantDTO(restaurant.getId(), restaurant.getName(), restaurant.getX(), restaurant.getY(), restaurant.getLogoUrl(), loghmeRepo.getRestaurantFoods(restaurant.getId())));
+        }
+        return toReturn;
+    }
+
+    public static ArrayList<RestaurantDTO> getRestaurantsOnLevel(int showLevel) {
+        ArrayList<RestaurantDTO> toReturn = new ArrayList<>();
+        LoghmeRepository loghmeRepo = LoghmeRepository.getInstance();
+        ArrayList<RestaurantDAO> restaurants = loghmeRepo.getRestaurantsOnLevel(showLevel * 12);
         for (RestaurantDAO restaurant: restaurants) {
             System.out.println(restaurant.getId());
             toReturn.add(new RestaurantDTO(restaurant.getId(), restaurant.getName(), restaurant.getX(), restaurant.getY(), restaurant.getLogoUrl(), loghmeRepo.getRestaurantFoods(restaurant.getId())));

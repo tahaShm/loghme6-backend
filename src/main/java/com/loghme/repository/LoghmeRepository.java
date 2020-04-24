@@ -41,8 +41,8 @@ public class LoghmeRepository {
         dataSource.setInitialPoolSize(5);
         dataSource.setMinPoolSize(5);
         dataSource.setAcquireIncrement(5);
-        dataSource.setMaxPoolSize(50);
-        dataSource.setMaxStatements(100);
+        dataSource.setMaxPoolSize(100);
+        dataSource.setMaxStatements(200);
     }
 
     public static LoghmeRepository getInstance() {
@@ -76,6 +76,31 @@ public class LoghmeRepository {
             Connection connection = dataSource.getConnection();
             Statement statement = connection.createStatement();
             ResultSet result = statement.executeQuery("select * from Restaurants");
+            while (result.next()) {
+                RestaurantDAO restaurantDao = new RestaurantDAO();
+                restaurantDao.setId(result.getString("id"));
+                restaurantDao.setName(result.getString("name"));
+                restaurantDao.setLogoUrl(result.getString("logoUrl"));
+                restaurantDao.setX(result.getFloat("x"));
+                restaurantDao.setY(result.getFloat("y"));
+                restaurants.add(restaurantDao);
+            }
+            result.close();
+            statement.close();
+            connection.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return restaurants;
+    }
+
+    public ArrayList<RestaurantDAO> getRestaurantsOnLevel(int numOfRestaurant) {
+        ArrayList<RestaurantDAO> restaurants = new ArrayList<RestaurantDAO>();
+        try {
+            Connection connection = dataSource.getConnection();
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery("select * from Restaurants limit " + numOfRestaurant + ";");
             while (result.next()) {
                 RestaurantDAO restaurantDao = new RestaurantDAO();
                 restaurantDao.setId(result.getString("id"));
