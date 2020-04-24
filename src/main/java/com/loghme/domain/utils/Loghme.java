@@ -16,6 +16,7 @@ public class Loghme
 {
     private static Loghme singleApp = null;
     private LoghmeRepository loghmeRepository = LoghmeRepository.getInstance();
+    private long partyStartTime;
 
     public static Loghme getInstance() {
         if (singleApp == null)
@@ -23,6 +24,12 @@ public class Loghme
 
         return singleApp;
     }
+
+    public void setPartyStartTime() {
+        partyStartTime = System.currentTimeMillis();
+    }
+
+    public long getPartyStartTime() { return partyStartTime; }
 
     public void changeCart(String username, String restaurantId, String foodName, int count, boolean isPartyFood) throws FoodFromOtherRestaurantInCartExp, ExtraFoodPartyExp, NotEnoughFoodToDelete {
         String currentOrderRestaurantId = loghmeRepository.getCurrentOrderRestaurantId(username);
@@ -76,5 +83,4 @@ public class Loghme
             }
         }
     }
-
 }
