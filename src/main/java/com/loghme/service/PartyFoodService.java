@@ -58,7 +58,6 @@ public class PartyFoodService {
     @RequestMapping(value = "/partyFood/time", method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public int getPartyRemainingTime() {
-//        System.out.println(System.currentTimeMillis() - loghme.getPartyStartTime());
         return (600 - (int) ((System.currentTimeMillis() - loghme.getPartyStartTime()) / 1000));
     }
 }

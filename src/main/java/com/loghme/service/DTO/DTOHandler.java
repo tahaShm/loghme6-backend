@@ -32,23 +32,11 @@ public class DTOHandler {
         return toReturn;
     }
 
-    public static ArrayList<RestaurantDTO> getRestaurants() {
-        ArrayList<RestaurantDTO> toReturn = new ArrayList<>();
-        LoghmeRepository loghmeRepo = LoghmeRepository.getInstance();
-        ArrayList<RestaurantDAO> restaurants = loghmeRepo.getRestaurants();
-        for (RestaurantDAO restaurant: restaurants) {
-//            System.out.println(restaurant.getId());
-            toReturn.add(new RestaurantDTO(restaurant.getId(), restaurant.getName(), restaurant.getX(), restaurant.getY(), restaurant.getLogoUrl(), loghmeRepo.getRestaurantFoods(restaurant.getId())));
-        }
-        return toReturn;
-    }
-
     public static ArrayList<RestaurantDTO> getRestaurantsOnLevel(int showLevel) {
         ArrayList<RestaurantDTO> toReturn = new ArrayList<>();
         LoghmeRepository loghmeRepo = LoghmeRepository.getInstance();
         ArrayList<RestaurantDAO> restaurants = loghmeRepo.getRestaurantsOnLevel(showLevel * 12);
         for (RestaurantDAO restaurant: restaurants) {
-            System.out.println(restaurant.getId());
             toReturn.add(new RestaurantDTO(restaurant.getId(), restaurant.getName(), restaurant.getX(), restaurant.getY(), restaurant.getLogoUrl(), loghmeRepo.getRestaurantFoods(restaurant.getId())));
         }
         return toReturn;
