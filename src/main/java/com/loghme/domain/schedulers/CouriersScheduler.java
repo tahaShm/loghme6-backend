@@ -15,11 +15,11 @@ import java.lang.*;
 
 public class CouriersScheduler extends TimerTask {
     private ArrayList<Courier> couriers = null;
-    private Restaurant restaurant;
+    private Location location;
     private int orderId;
 
-    public CouriersScheduler(Restaurant restaurant, int orderId) {
-        this.restaurant = restaurant;
+    public CouriersScheduler(Location location, int orderId) {
+        this.location = location;
         this.orderId = orderId;
     }
 
@@ -40,12 +40,11 @@ public class CouriersScheduler extends TimerTask {
     public Courier getClosestCourier() {
         Courier bestCourier = couriers.get(0);
         double d;
-        Location restaurantLocation = restaurant.getLocation();
         double minTime = Double.MAX_VALUE, time;
 
         for (Courier courier: couriers) {
-            d = Math.sqrt(Math.pow(restaurantLocation.getX(), 2) + Math.pow(restaurantLocation.getY(), 2));
-            d += Math.sqrt(Math.pow(restaurantLocation.getX() - courier.getLocation().getX(), 2) + Math.pow(restaurantLocation.getY() - courier.getLocation().getY(), 2));
+            d = Math.sqrt(Math.pow(location.getX(), 2) + Math.pow(location.getY(), 2));
+            d += Math.sqrt(Math.pow(location.getX() - courier.getLocation().getX(), 2) + Math.pow(location.getY() - courier.getLocation().getY(), 2));
             time = d / courier.getVelocity();
             if (time < minTime) {
                 minTime = time;
@@ -56,7 +55,6 @@ public class CouriersScheduler extends TimerTask {
     }
 
     public void run() {
-        Location restaurantLocation = restaurant.getLocation();
         initCouriers();
         Courier closestCourier;
         if (couriers != null && couriers.size() != 0) {
@@ -64,8 +62,8 @@ public class CouriersScheduler extends TimerTask {
             closestCourier = getClosestCourier();
             try {
                 double time;
-                time = Math.sqrt(Math.pow(restaurantLocation.getX(), 2) + Math.pow(restaurantLocation.getY(), 2));
-                time += Math.sqrt(Math.pow(restaurantLocation.getX() - closestCourier.getLocation().getX(), 2) + Math.pow(restaurantLocation.getY() - closestCourier.getLocation().getY(), 2));
+                time = Math.sqrt(Math.pow(location.getX(), 2) + Math.pow(location.getY(), 2));
+                time += Math.sqrt(Math.pow(location.getX() - closestCourier.getLocation().getX(), 2) + Math.pow(location.getY() - closestCourier.getLocation().getY(), 2));
                 time = time / closestCourier.getVelocity();
 
 //                order.setRemainingTime(time);

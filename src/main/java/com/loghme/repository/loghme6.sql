@@ -58,7 +58,7 @@ create table Orders (
     id integer NOT NULL AUTO_INCREMENT,
     username char(50),
     restaurantId char(100),
-    status ENUM ('searching', 'delivering', 'done'),
+    status ENUM ('searching', 'delivering', 'done', 'notFinalized'),
     registerTime DATETIME,
     primary key (id),
     foreign key (username) references Users(username) on delete cascade,

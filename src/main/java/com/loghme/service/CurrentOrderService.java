@@ -1,6 +1,5 @@
 package com.loghme.service;
 
-import com.loghme.service.DTO.DTOHandler;
 import com.loghme.service.DTO.FoodDTO;
 import com.loghme.domain.utils.Loghme;
 import org.springframework.http.MediaType;
@@ -17,7 +16,7 @@ public class CurrentOrderService {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ArrayList<FoodDTO> getCurrentOrder() {
         if (loghme.getUser().getCurrentOrder() != null)
-            return DTOHandler.getCurrentOrder();
+            return loghme.getCurrentOrderFoods("1234");
         else
             return null;
     }

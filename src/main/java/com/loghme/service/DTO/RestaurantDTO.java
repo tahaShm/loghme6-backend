@@ -13,6 +13,8 @@ public class RestaurantDTO {
     private String logo;
     private ArrayList<FoodDAO> menu;
 
+    public RestaurantDTO() {}
+
     public RestaurantDTO(String id, String name, float x, float y, String logo, ArrayList<FoodDAO> menu) {
         this.id = id;
         this.name = name;

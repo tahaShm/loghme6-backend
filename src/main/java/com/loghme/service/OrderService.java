@@ -24,7 +24,7 @@ public class OrderService {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public void finalizeOrder() {
         try {
-            loghme.finalizeOrder();
+            loghme.finalizeOrder("1234");
         }
         catch (Exception e) {
             throw new BadRequestException();
