@@ -333,7 +333,7 @@ public class LoghmeRepository {
         try {
             Connection connection = dataSource.getConnection();
             Statement statement = connection.createStatement();
-            ResultSet result = statement.executeQuery("select F.* from Foods f, Menu M where M.restaurantId = \"" + restaurantId  +"\" and M.foodId = F.id");
+            ResultSet result = statement.executeQuery("select F.* from Foods F, Menu M where M.restaurantId = \"" + restaurantId  +"\" and M.foodId = F.id");
             while (result.next()) {
                 FoodDAO foodDAO = new FoodDAO();
                 foodDAO.setId(result.getInt("id"));
