@@ -1,8 +1,6 @@
 package com.loghme.service;
 
-import com.loghme.domain.utils.Loghme;
 import com.loghme.domain.utils.exceptions.BadRequestException;
-import com.loghme.repository.LoghmeRepository;
 import com.loghme.service.DTO.DTOHandler;
 import com.loghme.service.DTO.RestaurantDTO;
 import org.springframework.http.MediaType;

@@ -1,7 +1,6 @@
 package com.loghme.service;
 
 import com.loghme.domain.utils.Loghme;
-import com.loghme.service.DTO.DTOHandler;
 import com.loghme.service.DTO.UserDTO;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;

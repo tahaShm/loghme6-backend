@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loghme.domain.utils.Courier;
 import com.loghme.domain.utils.Location;
-import com.loghme.domain.utils.Order;
-import com.loghme.domain.utils.Restaurant;
 import com.loghme.repository.LoghmeRepository;
 
 import java.util.ArrayList;

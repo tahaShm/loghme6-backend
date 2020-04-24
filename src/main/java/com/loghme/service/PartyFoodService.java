@@ -3,7 +3,6 @@ package com.loghme.service;
 import com.loghme.service.DTO.DTOHandler;
 import com.loghme.service.DTO.FoodDTO;
 import com.loghme.domain.utils.Loghme;
-import com.loghme.domain.utils.Restaurant;
 import com.loghme.service.DTO.PartyFoodDTO;
 import com.loghme.domain.utils.exceptions.BadRequestException;
 import org.springframework.http.MediaType;
@@ -37,7 +36,7 @@ public class PartyFoodService {
             @RequestParam(value = "foodName") String foodName,
             @RequestParam(value = "count") int count) {
         try {
-            loghme.changeCart("1234", id, foodName, count, true);
+            loghme.changeCart("1234", id, foodName, -count, true);
         }
         catch (Exception e) {
             throw new BadRequestException();
@@ -54,5 +53,12 @@ public class PartyFoodService {
         catch (Exception e) {
             throw new BadRequestException();
         }
+    }
+
+    @RequestMapping(value = "/partyFood/time", method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public int getPartyRemainingTime() {
+//        System.out.println(System.currentTimeMillis() - loghme.getPartyStartTime());
+        return (600 - (int) ((System.currentTimeMillis() - loghme.getPartyStartTime()) / 1000));
     }
 }

@@ -1,9 +1,5 @@
 package com.loghme.service.DTO;
 
-import com.loghme.domain.utils.Order;
-
-import java.util.ArrayList;
-
 public class UserDTO {
     private String id;
     private String name;

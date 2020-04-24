@@ -29,5 +29,6 @@ public class PartySchedulerRunnable implements Runnable {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        Loghme.getInstance().setPartyStartTime();
     }
 }
