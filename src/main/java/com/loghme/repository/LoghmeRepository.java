@@ -89,6 +89,36 @@ public class LoghmeRepository {
         return restaurants;
     }
 
+    public ArrayList<RestaurantDAO> getSearchedRestaurants(String restaurantName, String foodName){
+        ArrayList<RestaurantDAO> restaurants = new ArrayList<RestaurantDAO>();
+        try {
+            Connection connection = dataSource.getConnection();
+            Statement statement = connection.createStatement();
+            String sql = "select distinct R.* from Restaurants R, Foods F, Menu M where (F.name like \"%" + foodName + "%\" or R.name like \"%" + restaurantName + "%\") and R.id = M.restaurantId and F.id = M.foodId";
+            if (restaurantName == "" && foodName != "")
+                sql = "select distinct R.* from Restaurants R, Foods F, Menu M where (F.name like \"%" + foodName + "%\") and R.id = M.restaurantId and F.id = M.foodId";
+            else if (restaurantName != "" && foodName == "")
+                sql = "select distinct R.* from Restaurants R, Foods F, Menu M where (R.name like \"%" + restaurantName + "%\") and R.id = M.restaurantId and F.id = M.foodId";
+            ResultSet result = statement.executeQuery(sql);
+            while (result.next()) {
+                RestaurantDAO restaurantDao = new RestaurantDAO();
+                restaurantDao.setId(result.getString("id"));
+                restaurantDao.setName(result.getString("name"));
+                restaurantDao.setLogoUrl(result.getString("logoUrl"));
+                restaurantDao.setX(result.getFloat("x"));
+                restaurantDao.setY(result.getFloat("y"));
+                restaurants.add(restaurantDao);
+            }
+            result.close();
+            statement.close();
+            connection.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return restaurants;
+    }
+
     public void addRestaurant(String id, String name, String logo, float x, float y) throws SQLException {
         Connection connection;
         try {

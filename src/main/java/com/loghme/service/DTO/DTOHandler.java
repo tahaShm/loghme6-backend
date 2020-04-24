@@ -102,6 +102,19 @@ public class DTOHandler {
     public static RestaurantDTO getRestaurantById(String id) throws RestaurantNotFoundExp {
         LoghmeRepository loghmeRepo = LoghmeRepository.getInstance();
         RestaurantDAO restaurant = loghmeRepo.getRestaurantById(id);
+        if (restaurant == null)
+            throw new RestaurantNotFoundExp();
         return new RestaurantDTO(restaurant.getId(), restaurant.getName(), restaurant.getX(), restaurant.getY(), restaurant.getLogoUrl(), loghmeRepo.getRestaurantFoods(restaurant.getId()));
+    }
+
+    public static ArrayList<RestaurantDTO> getSearchedRestaurants(String restaurantName, String foodName){
+        ArrayList<RestaurantDTO> toReturn = new ArrayList<>();
+        LoghmeRepository loghmeRepo = LoghmeRepository.getInstance();
+        ArrayList<RestaurantDAO> restaurants = loghmeRepo.getSearchedRestaurants(restaurantName, foodName);
+        for (RestaurantDAO restaurant: restaurants) {
+            System.out.println(restaurant.getId());
+            toReturn.add(new RestaurantDTO(restaurant.getId(), restaurant.getName(), restaurant.getX(), restaurant.getY(), restaurant.getLogoUrl(), loghmeRepo.getRestaurantFoods(restaurant.getId())));
+        }
+        return toReturn;
     }
 }
