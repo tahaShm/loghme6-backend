@@ -36,7 +36,7 @@ public class LoghmeRepository {
         dataSource = new ComboPooledDataSource();
         dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/loghme6?useSSL=false");
         dataSource.setUser("root");
-        dataSource.setPassword("Taha1378");
+        dataSource.setPassword("Sph153153");
 
         dataSource.setInitialPoolSize(5);
         dataSource.setMinPoolSize(5);
@@ -157,7 +157,6 @@ public class LoghmeRepository {
                 connection.close();
             }
         }
-//        System.out.println("new restaurant added...");
     }
 
     public int addFood(String restaurantId, String name, String description, float popularity, String imageUrl, int price, int count) {
@@ -169,7 +168,6 @@ public class LoghmeRepository {
             ResultSet result = statement.executeQuery("select F.id from Foods F, Menu M where M.restaurantId = \"" + restaurantId + "\" and F.name = \"" + name + "\" and M.foodId = F.id");
             if (result.next()) { //food already exits -> update Foods
                 foodId = result.getInt("id");
-//                System.out.println("food update here!  " + foodId);
                 PreparedStatement pStatement = connection.prepareStatement(
                         "update Foods set description = ?, popularity = ?, imageUrl = ?, price = ?, count = ? where id = ?");
                 pStatement.setString(1, description);
@@ -195,10 +193,8 @@ public class LoghmeRepository {
 
                 if(rs.next())
                     foodId = rs.getInt(1);
-//                System.out.println("food insert here!" + foodId);
                 rs.close();
                 pStatement.close();
-//                System.out.println(foodId);
 
                 PreparedStatement pStatementMenu = connection.prepareStatement(
                         "insert into Menu (restaurantId, foodId) values (?, ?)");
@@ -246,7 +242,6 @@ public class LoghmeRepository {
             ResultSet result = statement.executeQuery("select PF.id from PartyFoods PF, PartyMenu PM where PM.restaurantId = \"" + restaurantId + "\" and PF.foodId = " + foodId + " and PM.partyFoodId = PF.id");
             if (result.next()) { //partyFood already exits -> update PartyFoods
                 partyFoodId = result.getInt("id");
-//                System.out.println("partyfood update here!  " + partyFoodId);
                 PreparedStatement pStatement = connection.prepareStatement(
                         "update PartyFoods set newPrice = ?, count = ?, valid = ? where id = ?");
 
@@ -269,7 +264,6 @@ public class LoghmeRepository {
 
                 if (rs.next())
                     partyFoodId = rs.getInt(1);
-//                System.out.println("partyfood insert here!" + partyFoodId);
                 rs.close();
                 pStatement.close();
 
@@ -366,7 +360,7 @@ public class LoghmeRepository {
         try {
             Connection connection = dataSource.getConnection();
             Statement statement = connection.createStatement();
-            ResultSet result = statement.executeQuery("select PF.id as pid, PF.newPrice, PF.count as pCount, PF.valid, F.* from PartyFoods PF,Foods f, PartyMenu PM where PF.valid = \"1\" and PF.foodId = F.id and PM.partyFoodId = PF.id");
+            ResultSet result = statement.executeQuery("select PF.id as pid, PF.newPrice, PF.count as pCount, PF.valid, F.* from PartyFoods PF,Foods F, PartyMenu PM where PF.valid = \"1\" and PF.foodId = F.id and PM.partyFoodId = PF.id");
             while (result.next()) {
                 PartyFoodDAO partyFoodDAO = new PartyFoodDAO();
                 partyFoodDAO.setId(result.getInt("pid"));
@@ -485,7 +479,6 @@ public class LoghmeRepository {
             if(rs.next())
                 orderId = rs.getInt(1);
             rs.close();
-//            System.out.println("order added: " + orderId);
             pStatement.close();
 
             if (foods == null && partyFoods == null)
@@ -497,7 +490,6 @@ public class LoghmeRepository {
                 orderRowStatement.clearParameters();
                 int foodId = getFoodId(entry.getKey().getName(), restaurantId);
                 if (foodId == -1) {
-//                    System.out.println("food fucked here!");
                     throw new SQLException();
                 }
                 orderRowStatement.setInt(1, orderId);
@@ -505,14 +497,12 @@ public class LoghmeRepository {
                 orderRowStatement.setString(3, null);
                 orderRowStatement.setInt(4, entry.getValue());
                 orderRowStatement.setString(5, "normal");
-//                System.out.println("food success!");
                 orderRowStatement.addBatch();
             }
             for (Map.Entry<PartyFood, Integer> entry: partyFoods.entrySet()) {
                 orderRowStatement.clearParameters();
                 int foodId = getPartyFoodId(entry.getKey().getName(), restaurantId);
                 if (foodId == -1) {
-//                    System.out.println("partyFood fucked here!");
                     throw new SQLException();
                 }
                 orderRowStatement.setInt(1, orderId);
@@ -520,7 +510,6 @@ public class LoghmeRepository {
                 orderRowStatement.setInt(3, foodId);
                 orderRowStatement.setInt(4, entry.getValue());
                 orderRowStatement.setString(5, "party");
-//                System.out.println("partyFood success!");
                 orderRowStatement.addBatch();
             }
             orderRowStatement.executeBatch();
@@ -644,10 +633,8 @@ public class LoghmeRepository {
         try {
             Connection connection = dataSource.getConnection();
             Statement statement = connection.createStatement();
-//            System.out.println("order id : " + orderId);
             ResultSet result = statement.executeQuery("select * from OrderRows where orderId=" + orderId);
             while (result.next()) {
-//                System.out.println("food id : " + result.getInt("foodId"));
                 FoodDTO foodDTO = new FoodDTO();
                 foodDTO.setCount(result.getInt("count"));
                 FoodDTO food = getFoodDTOById(result.getInt("foodId"), result.getInt("partyFoodId"), result.getString("foodType"));
@@ -852,6 +839,22 @@ public class LoghmeRepository {
         }
     }
 
+    public void reducePartyFoods(int orderId) {
+        Connection connection;
+        try {
+            connection = dataSource.getConnection();
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery("SELECT * FROM OrderRows WHERE orderId=" + orderId + " and foodType=\"party\"");
+            while (result.next()) {
+                Statement statement2 = connection.createStatement();
+                statement2.executeUpdate("UPDATE PartyFoods SET count = count-" + result.getInt("count") + " WHERE id=" + result.getInt("partyFoodId"));
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public int finalizeOrder(String username) throws NotEnoughCreditExp {
         int orderId = getCurrentOrderId(username);
         ArrayList<FoodDTO> foodDTOS = getFoodsByOrderId(orderId);
@@ -863,6 +866,7 @@ public class LoghmeRepository {
             removeCurrentOrder(username);
             throw new NotEnoughCreditExp();
         }
+        reducePartyFoods(orderId);
         updateOrderStatus("searching", orderId);
         return orderId;
     }
