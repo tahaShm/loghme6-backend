@@ -30,12 +30,12 @@ public class LoghmeRepository {
         dataSource = new ComboPooledDataSource();
         dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/loghme6?useSSL=false");
         dataSource.setUser("root");
-        dataSource.setPassword("Sph153153");
+        dataSource.setPassword("Taha1378");
 
         dataSource.setInitialPoolSize(5);
         dataSource.setMinPoolSize(5);
         dataSource.setAcquireIncrement(5);
-        dataSource.setMaxPoolSize(20);
+        dataSource.setMaxPoolSize(50);
         dataSource.setMaxStatements(100);
     }
 
@@ -54,9 +54,9 @@ public class LoghmeRepository {
             if (result.next()) {
                 String phoneNumber = result.getString("phoneNumber");
                 //same way for other attributes
-                statement.close();
-                connection.close();
             }
+            statement.close();
+            connection.close();
             //exception not handled
         }
         catch (SQLException e) {
@@ -64,7 +64,7 @@ public class LoghmeRepository {
         }
     }
 
-    public List<RestaurantDAO> getRestaurants() {
+    public ArrayList<RestaurantDAO> getRestaurants() {
         ArrayList<RestaurantDAO> restaurants = new ArrayList<RestaurantDAO>();
         try {
             Connection connection = dataSource.getConnection();
@@ -121,7 +121,7 @@ public class LoghmeRepository {
                 connection.close();
             }
         }
-        System.out.println("new restaurant added...");
+//        System.out.println("new restaurant added...");
     }
 
     public int addFood(String restaurantId, String name, String description, float popularity, String imageUrl, int price, int count) {
@@ -162,7 +162,7 @@ public class LoghmeRepository {
 //                System.out.println("food insert here!" + foodId);
                 rs.close();
                 pStatement.close();
-                System.out.println(foodId);
+//                System.out.println(foodId);
 
                 PreparedStatement pStatementMenu = connection.prepareStatement(
                         "insert into Menu (restaurantId, foodId) values (?, ?)");
@@ -210,7 +210,7 @@ public class LoghmeRepository {
             ResultSet result = statement.executeQuery("select PF.id from PartyFoods PF, PartyMenu PM where PM.restaurantId = \"" + restaurantId + "\" and PF.foodId = \"" + foodId + "\" and PM.partyFoodId = PF.id");
             if (result.next()) { //partyFood already exits -> update PartyFoods
                 partyFoodId = result.getInt("id");
-                System.out.println("partyfood update here!  " + partyFoodId);
+//                System.out.println("partyfood update here!  " + partyFoodId);
                 PreparedStatement pStatement = connection.prepareStatement(
                         "update PartyFoods set newPrice = ?, count = ?, valid = ? where id = ?");
 
@@ -233,7 +233,7 @@ public class LoghmeRepository {
 
                 if (rs.next())
                     partyFoodId = rs.getInt(1);
-                System.out.println("partyfood insert here!" + partyFoodId);
+//                System.out.println("partyfood insert here!" + partyFoodId);
                 rs.close();
                 pStatement.close();
 
@@ -275,7 +275,7 @@ public class LoghmeRepository {
         return restaurantDao;
     }
 
-    public List<FoodDAO> getRestaurantFoods(String restaurantId) {
+    public ArrayList<FoodDAO> getRestaurantFoods(String restaurantId) {
         ArrayList<FoodDAO> foods = new ArrayList<FoodDAO>();
         try {
             Connection connection = dataSource.getConnection();
@@ -302,7 +302,7 @@ public class LoghmeRepository {
         return foods;
     }
 
-    public List<PartyFoodDAO> getValidPartyFoods () {
+    public ArrayList<PartyFoodDAO> getValidPartyFoods () {
         ArrayList<PartyFoodDAO> partyFoods = new ArrayList<PartyFoodDAO>();
         try {
             Connection connection = dataSource.getConnection();
@@ -393,6 +393,7 @@ public class LoghmeRepository {
             if(rs.next())
                 orderId = rs.getInt(1);
             rs.close();
+            System.out.println("order added: " + orderId);
             pStatement.close();
 
             PreparedStatement orderRowStatement = connection.prepareStatement(
@@ -400,25 +401,31 @@ public class LoghmeRepository {
             for (Map.Entry<Food, Integer> entry: foods.entrySet()) {
                 orderRowStatement.clearParameters();
                 int foodId = getFoodId(entry.getKey().getName(), restaurantId);
-                if (foodId == -1)
+                if (foodId == -1) {
+                    System.out.println("food fucked here!");
                     throw new SQLException();
+                }
                 orderRowStatement.setInt(1, orderId);
                 orderRowStatement.setInt(2, foodId);
                 orderRowStatement.setString(3, null);
                 orderRowStatement.setInt(4, entry.getValue());
                 orderRowStatement.setString(5, "normal");
+                System.out.println("food success!");
                 orderRowStatement.addBatch();
             }
             for (Map.Entry<PartyFood, Integer> entry: partyFoods.entrySet()) {
                 orderRowStatement.clearParameters();
                 int foodId = getPartyFoodId(entry.getKey().getName(), restaurantId);
-                if (foodId == -1)
+                if (foodId == -1) {
+                    System.out.println("partyFood fucked here!");
                     throw new SQLException();
+                }
                 orderRowStatement.setInt(1, orderId);
                 orderRowStatement.setString(2, null);
                 orderRowStatement.setInt(3, foodId);
                 orderRowStatement.setInt(4, entry.getValue());
                 orderRowStatement.setString(5, "party");
+                System.out.println("partyFood success!");
                 orderRowStatement.addBatch();
             }
             orderRowStatement.executeBatch();

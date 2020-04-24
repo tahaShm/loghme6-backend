@@ -55,6 +55,7 @@ public class FoodService {
             @RequestParam(value = "id") String id) {
         ArrayList<FoodDTO> foods = null;
         try {
+            System.out.println("food request here!");
             foods = DTOHandler.getRestaurantFoods(id);
         }
         catch (Exception e) {

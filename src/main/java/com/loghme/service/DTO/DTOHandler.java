@@ -2,6 +2,10 @@ package com.loghme.service.DTO;
 
 import com.loghme.domain.utils.*;
 import com.loghme.domain.utils.exceptions.RestaurantNotFoundExp;
+import com.loghme.repository.DAO.FoodDAO;
+import com.loghme.repository.DAO.PartyFoodDAO;
+import com.loghme.repository.DAO.RestaurantDAO;
+import com.loghme.repository.LoghmeRepository;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -16,6 +20,13 @@ public class DTOHandler {
                 foods.add(new PartyFoodDTO(partyFood, restaurant.getName(), restaurant.getId()));
         }
         return foods;
+//        ArrayList<PartyFoodDTO> retPartyFoods = new ArrayList<>();
+//        LoghmeRepository loghmeRepo = LoghmeRepository.getInstance();
+//        ArrayList<PartyFoodDAO> partyFoods = loghmeRepo.getValidPartyFoods();
+//        for (PartyFoodDAO partyFood: partyFoods) {
+//            retPartyFoods.add(new PartyFoodDTO(partyFood, loghmeRepo.getRestaurantById(), restaurant.getId()));
+//        }
+//        return retPartyFoods;
     }
 
     public static ArrayList<FoodDTO> getCurrentOrder() {
@@ -46,9 +57,11 @@ public class DTOHandler {
 
     public static ArrayList<FoodDTO> getRestaurantFoods(String id) throws RestaurantNotFoundExp {
         ArrayList<FoodDTO> toReturn = new ArrayList<>();
-        Restaurant restaurant = loghme.getRestaurantById(id);
-        for (Food food: restaurant.getMenu()) {
-            toReturn.add(new FoodDTO(food.getName(), food.getPrice(), food.getDescription(), food.getPopularity(), food.getImage()));
+        LoghmeRepository loghmeRepo = LoghmeRepository.getInstance();
+        ArrayList<FoodDAO> foods = loghmeRepo.getRestaurantFoods(id);
+        for (FoodDAO food: foods) {
+            System.out.println(food.getImageUrl());
+            toReturn.add(new FoodDTO(food.getName(), food.getPrice(), food.getDescription(), food.getPopularity(), food.getImageUrl()));
         }
         return toReturn;
     }
@@ -76,14 +89,18 @@ public class DTOHandler {
 
     public static ArrayList<RestaurantDTO> getRestaurants() {
         ArrayList<RestaurantDTO> toReturn = new ArrayList<>();
-        for (Restaurant restaurant: loghme.getRestaurants()) {
-            toReturn.add(new RestaurantDTO(restaurant.getId(), restaurant.getName(), restaurant.getLocation(), restaurant.getLogo(), getRestaurantMenu(restaurant)));
+        LoghmeRepository loghmeRepo = LoghmeRepository.getInstance();
+        ArrayList<RestaurantDAO> restaurants = loghmeRepo.getRestaurants();
+        for (RestaurantDAO restaurant: restaurants) {
+            System.out.println(restaurant.getId());
+            toReturn.add(new RestaurantDTO(restaurant.getId(), restaurant.getName(), restaurant.getX(), restaurant.getY(), restaurant.getLogoUrl(), loghmeRepo.getRestaurantFoods(restaurant.getId())));
         }
         return toReturn;
     }
 
     public static RestaurantDTO getRestaurantById(String id) throws RestaurantNotFoundExp {
-        Restaurant restaurant = loghme.getRestaurantById(id);
-        return new RestaurantDTO(restaurant.getId(), restaurant.getName(), restaurant.getLocation(), restaurant.getLogo(), getRestaurantMenu(restaurant));
+        LoghmeRepository loghmeRepo = LoghmeRepository.getInstance();
+        RestaurantDAO restaurant = loghmeRepo.getRestaurantById(id);
+        return new RestaurantDTO(restaurant.getId(), restaurant.getName(), restaurant.getX(), restaurant.getY(), restaurant.getLogoUrl(), loghmeRepo.getRestaurantFoods(restaurant.getId()));
     }
 }
