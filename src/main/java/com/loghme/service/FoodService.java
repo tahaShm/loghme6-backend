@@ -1,6 +1,5 @@
 package com.loghme.service;
 
-import com.loghme.domain.utils.Food;
 import com.loghme.service.DTO.DTOHandler;
 import com.loghme.service.DTO.FoodDTO;
 import com.loghme.domain.utils.Loghme;
@@ -22,13 +21,12 @@ public class FoodService {
             @RequestParam(value = "foodName") String foodName,
             @RequestParam(value = "count") int count) {
         try {
-            Restaurant restaurant = loghme.getRestaurantById(id);
-            loghme.addToCart(restaurant, foodName, count, false);
+            loghme.changeCart("1234", id, foodName, count, false);
         }
         catch (Exception e) {
             throw new BadRequestException();
         }
-        return DTOHandler.getCurrentOrder();
+        return loghme.getCurrentOrderFoods("1234");
     }
 
     @RequestMapping(value = "/food/{id}", method = RequestMethod.DELETE,
@@ -38,15 +36,14 @@ public class FoodService {
             @RequestParam(value = "foodName") String foodName,
             @RequestParam(value = "count") int count) {
         try {
-            Restaurant restaurant = loghme.getRestaurantById(id);
-            loghme.removeFromCart(restaurant, foodName, count, false);
+            loghme.changeCart("1234", id, foodName, count, false);
         }
         catch (Exception e) {
             throw new BadRequestException();
         }
         if (loghme.getUser().getCurrentOrder() == null)
             return null;
-        return DTOHandler.getCurrentOrder();
+        return loghme.getCurrentOrderFoods("1234");
     }
 
     @RequestMapping(value = "/food", method = RequestMethod.GET,

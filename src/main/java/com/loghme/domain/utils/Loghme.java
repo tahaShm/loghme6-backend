@@ -3,7 +3,9 @@ package com.loghme.domain.utils;
 import com.loghme.domain.schedulers.CouriersScheduler;
 import com.loghme.domain.utils.exceptions.*;
 import com.loghme.repository.LoghmeRepository;
+import com.loghme.service.DTO.FoodDTO;
 import com.loghme.service.DTO.OrderDTO;
+import com.loghme.service.DTO.UserDTO;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -85,72 +87,48 @@ public class Loghme
         return allRestaurants;
     }
 
-    public void addToCart(Restaurant restaurant, String foodName, int count, boolean isPartyFood) throws FoodFromOtherRestaurantInCartExp, ExtraFoodPartyExp, FoodNotFoundExp {
-        boolean allowToAdd = false;
-        if (user.getCurrentOrder() == null) {
-            Order newOrder = new Order(lastOrderId, restaurant);
-            user.setCurrentOrder(newOrder);
-            allowToAdd = true;
-            lastOrderId++;
-        }
-        else {
-            if (restaurant.getId().equals(user.currentOrder.getRestaurant().getId()))
-                allowToAdd = true;
-        }
-        if (allowToAdd) {
-            if (isPartyFood) {
-                PartyFood partyFood = getPartyFoodByName(foodName, restaurant);
-                user.addPartyFoodToCurrentOrder(partyFood, count);
-            }
-            else {
-                Food food = getFoodByName(foodName, restaurant);
-                user.addFoodToCurrentOrder(food, count);
-            }
+    public void changeCart(String username, String restaurantId, String foodName, int count, boolean isPartyFood) throws FoodFromOtherRestaurantInCartExp, ExtraFoodPartyExp, NotEnoughFoodToDelete {
+        String currentOrderRestaurantId = loghmeRepository.getCurrentOrderRestaurantId(user.getId());
+        if (currentOrderRestaurantId == null || currentOrderRestaurantId.equals(restaurantId)) {
+            if (isPartyFood)
+                loghmeRepository.changeCurrentOrder(username, foodName, restaurantId, count, "party");
+            else
+                loghmeRepository.changeCurrentOrder(username, foodName, restaurantId, count, "normal");
         }
         else
             throw new FoodFromOtherRestaurantInCartExp();
     }
 
-    public void removeFromCart(Restaurant restaurant, String foodName, int count, boolean isPartyFood) throws FoodFromOtherRestaurantInCartExp, NotEnoughFoodToDelete, FoodNotFoundExp {
-        if (!restaurant.getId().equals(user.getCurrentOrder().getRestaurant().getId()))
-            throw new FoodFromOtherRestaurantInCartExp();
-        if (isPartyFood) {
-            PartyFood partyFood = getPartyFoodByName(foodName, restaurant);
-            user.removePartyFoodFromCurrentOrder(partyFood, count);
-        }
-        else {
-            Food food = getFoodByName(foodName, restaurant);
-            user.removeFoodFromCurrentOrder(food, count);
-        }
-    }
+    public void finalizeOrder(String username) throws NotEnoughCreditExp, RestaurantNotFoundExp {
+//        int cartPrice = user.cartOverallPrice();
+//        Restaurant currentRestaurant = user.getCurrentOrder().getRestaurant();
+//        if (cartPrice > user.getCredit()) {
+//            user.emptyCurrentOrder();
+//            throw new NotEnoughCreditExp();
+//        }
+//        try {
+//            currentRestaurant.reducePartyFoodAmounts(user.getCurrentOrder());
+//        }
+//        catch (ExtraFoodPartyExp e) {
+//            user.emptyCurrentOrder();
+//            throw new ExtraFoodPartyExp();
+//        }
+//        user.getCurrentOrder().setStatus("searching");
 
-    public void finalizeOrder() throws NotEnoughCreditExp, ExtraFoodPartyExp {
-        int cartPrice = user.cartOverallPrice();
-        Restaurant currentRestaurant = user.getCurrentOrder().getRestaurant();
-        if (cartPrice > user.getCredit()) {
-            user.emptyCurrentOrder();
-            throw new NotEnoughCreditExp();
-        }
-        try {
-            currentRestaurant.reducePartyFoodAmounts(user.getCurrentOrder());
-        }
-        catch (ExtraFoodPartyExp e) {
-            user.emptyCurrentOrder();
-            throw new ExtraFoodPartyExp();
-        }
-        user.getCurrentOrder().setStatus("searching");
+//        user.addCredit(-1 * cartPrice);
+//        user.addOrder(user.getCurrentOrder());
 
-        user.addCredit(-1 * cartPrice);
-        user.addOrder(user.getCurrentOrder());
+//        Order currentOrder = getUser().getCurrentOrder();
+//        int orderId = loghmeRepository.addOrder(getUser().getId(), currentOrder.getRestaurant().getId(), "searching", currentOrder.getFoods(), currentOrder.getPartyFoods());
 
-        Order currentOrder = getUser().getCurrentOrder();
-        int orderId = loghmeRepository.addOrder(getUser().getId(), currentOrder.getRestaurant().getId(), "searching", currentOrder.getFoods(), currentOrder.getPartyFoods());
+        int orderId = loghmeRepository.finalizeOrder(username);
+        Location location = loghmeRepository.getOrderRestaurantLocation(orderId);
 
         Timer timer = new Timer();
-        TimerTask task = new CouriersScheduler(user.getCurrentOrder().getRestaurant(), orderId);
+        TimerTask task = new CouriersScheduler(location, orderId);
         timer.schedule(task, 0, 3000);
 
-        user.emptyCurrentOrder();
+//        user.emptyCurrentOrder();
     }
 
     public ArrayList<Restaurant> getCloseRestaurants(float distance){
@@ -170,13 +148,17 @@ public class Loghme
         throw new RestaurantNotFoundExp();
     }
 
-    public void addCredit(int credit) {
-        user.addCredit(credit);
+    public void addCredit(String username, String json) throws JSONException, NotEnoughCreditExp {
+        JSONObject obj = new JSONObject(json);
+        loghmeRepository.changeCredit(username, obj.getInt("credit"));
     }
 
-    public void addCredit(String json) throws JSONException {
-        JSONObject obj = new JSONObject(json);
-        user.addCredit(obj.getInt("credit"));
+    public int getUserCredit(String username) {
+        return loghmeRepository.getCredit(username);
+    }
+
+    public UserDTO getUserDTO(String username) {
+        return loghmeRepository.getUserDTO(username);
     }
 
     public Food getFoodByName(String foodName, Restaurant restaurant) throws FoodNotFoundExp {
@@ -234,5 +216,9 @@ public class Loghme
 
     public ArrayList<OrderDTO> getUserOrders(String username) {
         return loghmeRepository.getOrders(username);
+    }
+
+    public ArrayList<FoodDTO> getCurrentOrderFoods(String username) {
+        return loghmeRepository.getCurrentOrderFoods(username);
     }
 }

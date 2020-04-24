@@ -30,19 +30,6 @@ public class DTOHandler {
         return retPartyFoods;
     }
 
-    public static ArrayList<FoodDTO> getCurrentOrder() {
-        ArrayList<FoodDTO> toReturn = new ArrayList<>();
-        for (Map.Entry<Food, Integer> entry: loghme.getUser().getCurrentOrder().getFoods().entrySet()) {
-            Food currFood = entry.getKey();
-            toReturn.add(new FoodDTO(currFood.getName(), currFood.getPrice(), entry.getValue()));
-        }
-        for (Map.Entry<PartyFood, Integer> entry: loghme.getUser().getCurrentOrder().getPartyFoods().entrySet()) {
-            PartyFood currFood = entry.getKey();
-            toReturn.add(new FoodDTO(currFood.getName(), currFood.getNewPrice(), entry.getValue()));
-        }
-        return toReturn;
-    }
-
     public static ArrayList<FoodDTO> getOrderFoods(Order order) {
         ArrayList<FoodDTO> toReturn = new ArrayList<>();
         for (Map.Entry<Food, Integer> entry: order.getFoods().entrySet()) {
@@ -74,10 +61,6 @@ public class DTOHandler {
             toReturn.add(orderDTO);
         }
         return toReturn;
-    }
-    public static UserDTO getUser() {
-        User user = loghme.getUser();
-        return new UserDTO(user.getId(), user.getName(), user.getPhoneNumber(), user.getEmail(), user.getCredit());
     }
 
     public static ArrayList<FoodDTO> getRestaurantMenu(Restaurant restaurant) {

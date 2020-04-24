@@ -48,6 +48,7 @@ public class RestaurantsScheduler implements ServletContextListener {
                     for (Food food: restaurant.getMenu()) {
                         loghmeRepo.addFood(restaurant.getId(), food.getName(), food.getDescription(), food.getPopularity(), food.getImage(), food.getPrice(), food.getCount());
                     }
+//                    break;
                 }
 
                 loghme.getUser().setId("1234");
