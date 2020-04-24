@@ -14,19 +14,20 @@ public class DTOHandler {
     private static Loghme loghme = Loghme.getInstance();
 
     public static ArrayList<PartyFoodDTO> getPartyFoods() {
-        ArrayList<PartyFoodDTO> foods = new ArrayList<>();
-        for (Restaurant restaurant: loghme.getRestaurants()) {
-            for (PartyFood partyFood: restaurant.getPartyFoods())
-                foods.add(new PartyFoodDTO(partyFood, restaurant.getName(), restaurant.getId()));
-        }
-        return foods;
-//        ArrayList<PartyFoodDTO> retPartyFoods = new ArrayList<>();
-//        LoghmeRepository loghmeRepo = LoghmeRepository.getInstance();
-//        ArrayList<PartyFoodDAO> partyFoods = loghmeRepo.getValidPartyFoods();
-//        for (PartyFoodDAO partyFood: partyFoods) {
-//            retPartyFoods.add(new PartyFoodDTO(partyFood, loghmeRepo.getRestaurantById(), restaurant.getId()));
+//        ArrayList<PartyFoodDTO> foods = new ArrayList<>();
+//        for (Restaurant restaurant: loghme.getRestaurants()) {
+//            for (PartyFood partyFood: restaurant.getPartyFoods())
+//                foods.add(new PartyFoodDTO(partyFood, restaurant.getName(), restaurant.getId()));
 //        }
-//        return retPartyFoods;
+//        return foods;
+        ArrayList<PartyFoodDTO> retPartyFoods = new ArrayList<>();
+        LoghmeRepository loghmeRepo = LoghmeRepository.getInstance();
+        ArrayList<PartyFoodDAO> partyFoods = loghmeRepo.getValidPartyFoods();
+        for (PartyFoodDAO partyFood: partyFoods) {
+            RestaurantDAO currentRestaurant = loghmeRepo.getRestaurantByPartyFoodId(partyFood.getId());
+            retPartyFoods.add(new PartyFoodDTO(partyFood, currentRestaurant.getName(), currentRestaurant.getId()));
+        }
+        return retPartyFoods;
     }
 
     public static ArrayList<FoodDTO> getCurrentOrder() {

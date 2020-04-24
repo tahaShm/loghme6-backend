@@ -1,21 +1,22 @@
 package com.loghme.service.DTO;
 
 import com.loghme.domain.utils.PartyFood;
+import com.loghme.repository.DAO.PartyFoodDAO;
 
 public class PartyFoodDTO {
-    private PartyFood food;
+    private PartyFoodDAO food;
     private String restaurantName;
     private String restaurantId;
 
-    public PartyFoodDTO(PartyFood food, String restaurantName, String restaurantId) {
+    public PartyFoodDTO(PartyFoodDAO food, String restaurantName, String restaurantId) {
         this.food = food;
         this.restaurantName = restaurantName;
         this.restaurantId = restaurantId;
     }
 
-    public PartyFood getFood() { return food; }
+    public PartyFoodDAO getFood() { return food; }
 
-    public void setFood(PartyFood food) { this.food = food; }
+    public void setFood(PartyFoodDAO food) { this.food = food; }
 
     public String getRestaurantName() { return restaurantName; }
 

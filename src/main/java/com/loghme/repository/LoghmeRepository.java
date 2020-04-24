@@ -275,6 +275,29 @@ public class LoghmeRepository {
         return restaurantDao;
     }
 
+    public RestaurantDAO getRestaurantByPartyFoodId(int partyFoodId) {
+        RestaurantDAO restaurantDao = new RestaurantDAO();
+        try {
+            Connection connection = dataSource.getConnection();
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery("select R.* from Restaurants R, PartyMenu PM where PM.partyFoodId = \"" + partyFoodId  +"\" and PM.restaurantId = R.id");
+            if (result.next()) {
+                restaurantDao.setId(result.getString("id"));
+                restaurantDao.setName(result.getString("name"));
+                restaurantDao.setLogoUrl(result.getString("logoUrl"));
+                restaurantDao.setX(result.getFloat("x"));
+                restaurantDao.setY(result.getFloat("y"));
+            }
+            result.close();
+            statement.close();
+            connection.close();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return restaurantDao;
+    }
+
     public ArrayList<FoodDAO> getRestaurantFoods(String restaurantId) {
         ArrayList<FoodDAO> foods = new ArrayList<FoodDAO>();
         try {
